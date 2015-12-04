@@ -33,15 +33,6 @@ namespace :committed do
       # Get the Capistrano revision log
       lines = capture(:cat, revision_log).split("\n")
 
-      # Set the branch to look for in the logs
-      if fetch(:committed_user).nil?
-        branch = fetch(:committed_branch)
-      else
-        branch = sprintf('%s/%s',
-                         fetch(:committed_user),
-                         fetch(:committed_branch))
-      end
-
       # Build the regex to search for revision data in the log, by default this
       # is the localised string from Capistrano
       search = fetch(:committed_revision_line)
@@ -53,7 +44,7 @@ namespace :committed do
       revisions = {}
       lines.each do |line|
         matches = search.match(line)
-        next unless matches[:branch] == branch
+        next unless matches[:branch] == fetch(:branch)
         revisions[matches[:sha]] = {
           :branch => matches[:branch],
           :sha => matches[:sha],
@@ -68,7 +59,7 @@ namespace :committed do
       # No revisions, no log
       if revisions.empty?
         info I18n.t('capistrano.committed.error.runtime.revisions_empty',
-                    branch: branch,
+                    branch: fetch(:branch),
                     stage: fetch(:stage))
         return
       end
@@ -106,7 +97,7 @@ namespace :committed do
       # No commit data on revisions, no log
       if earliest_date.nil?
         info I18n.t('capistrano.committed.error.runtime.revision_commit_missing',
-                    branch: branch,
+                    branch: fetch(:branch),
                     stage: fetch(:stage))
         return
       end
@@ -119,12 +110,12 @@ namespace :committed do
       commits = github.get_commits_since(fetch(:committed_user),
                                          fetch(:committed_repo),
                                          earliest_date,
-                                         fetch(:committed_branch))
+                                         fetch(:branch))
 
       # No commits, no log
       if commits.empty?
         info I18n.t('capistrano.committed.error.runtime.commits_empty',
-                    branch: branch,
+                    branch: fetch(:branch),
                     stage: fetch(:stage),
                     time: earliest_date)
         return
@@ -388,7 +379,6 @@ namespace :load do
     # See README for descriptions of each setting
     set :committed_user,            ->{ nil }
     set :committed_repo,            ->{ nil }
-    set :committed_branch,          ->{ 'master' }
     set :committed_revision_line,   ->{ I18n.t('capistrano.revision_log_message') }
     set :committed_github_config,   ->{ {} }
     set :committed_revision_limit,  ->{ 10 }

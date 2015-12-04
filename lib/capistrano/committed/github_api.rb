@@ -30,8 +30,8 @@ module Capistrano
       def get_commits_since(user, repo, date, branch = 'master')
         validate_user_and_repo(user, repo)
         date = Time.parse(date) if date.is_a?(String)
-        raise TypeError, sprintf('`%s` requires a valid branch.', __callee__) unless branch.is_a?(String)
         raise TypeError, sprintf('`%s` requires a valid date.', __callee__) unless date.is_a?(Time)
+        raise TypeError, sprintf('`%s` requires a valid branch.', __callee__) unless branch.is_a?(String)
 
         begin
           @client.repos.commits.list(:user => user, :repo => repo, :sha => branch, :since => date.iso8601)

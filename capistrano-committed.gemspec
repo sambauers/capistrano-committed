@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Sam Bauers"]
   spec.email         = ["sam@redant.com.au"]
 
-  spec.summary       = %q{Get a full release log with git commit history in Capistrano.}
-  spec.description   = %q{Get a full release log with git commit history in Capistrano.}
+  spec.summary       = %q{Tells you what Capistrano 3 is going to deploy based on GitHub commits since the last release.}
+  spec.description   = %q{Tells you what Capistrano 3 is going to deploy based on GitHub commits since the last release.}
   spec.homepage      = "https://github.com/sambauers/capistrano-committed"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }

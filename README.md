@@ -68,9 +68,6 @@ set :committed_github_config, {
 The following settings are optional, the default values are shown here:
 
 ```ruby
-# The branch to check - could be dynamically set if desired
-set :committed_branch, 'master'
-
 # This describes the line that we are looking for and matching against to get
 # revision details from the revision log. Grabbing this from Capistrano locales
 # by default.

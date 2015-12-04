@@ -243,7 +243,7 @@ namespace :committed do
                                     I18n.t('capistrano.committed.output.issue_links'))
                   issues.each do |issue|
                     url = sprintf(fetch(:committed_issue_url), issue)
-                    output << sprintf('   %s', url)
+                    output << sprintf('   - %s', url)
                   end
                   output << ''
                 end
@@ -289,7 +289,7 @@ namespace :committed do
                                           I18n.t('capistrano.committed.output.issue_links'))
                         issues.each do |issue|
                           url = sprintf(fetch(:committed_issue_url), issue)
-                          output << sprintf('   |   %s' , url)
+                          output << sprintf('   |   - %s' , url)
                         end
                         output << '   |'
                       end
@@ -326,7 +326,7 @@ namespace :committed do
               lines = entry[:info][:commit][:message].chomp.split("\n")
               unless lines.empty?
                 output << sprintf('   > %s', lines.join("\n   > "))
-                output << '   >'
+                output << ''
 
                 unless fetch(:committed_issue_match).nil? || fetch(:committed_issue_url).nil?
                   # Get any issue numbers referred to in the commit message and print links to them
@@ -337,7 +337,7 @@ namespace :committed do
                                       I18n.t('capistrano.committed.output.issue_links'))
                     issues.each do |issue|
                       url = sprintf(fetch(:committed_issue_url), issue)
-                      output << sprintf('   %s', url)
+                      output << sprintf('   - %s', url)
                     end
                     output << ''
                   end
@@ -345,10 +345,10 @@ namespace :committed do
               end
 
               # Committer details
-              output << sprintf('   |   %s',
+              output << sprintf('   %s',
                                 I18n.t('capistrano.committed.output.committed_on',
                                        time: entry[:info][:commit][:committer][:date]))
-              output << sprintf('   |   %s',
+              output << sprintf('   %s',
                                 I18n.t('capistrano.committed.output.committed_by',
                                        login: entry[:info][:committer][:login]))
               output << ''

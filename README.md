@@ -1,4 +1,11 @@
+<div align="center">
+  <a href="https://github.com/sambauers/capistrano-committed"><img width="136" src="https://github.com/sambauers/capistrano-committed/raw/master/icons/capricorn.png" alt="Capistrano Committed logo" /></a>
+</div>
+
 # Capistrano Committed
+
+[![Gem Version](https://badge.fury.io/rb/capistrano-committed.svg)](https://badge.fury.io/rb/capistrano-committed)
+[![Dependency Status](https://gemnasium.com/sambauers/capistrano-committed.svg)](https://gemnasium.com/sambauers/capistrano-committed)
 
 Capistrano Committed is an extension to Capistrano 3 which helps to determine what you are about to deploy.
 

@@ -113,3 +113,14 @@ Once your required settings are all in place, you can generate a report by runni
 ```shell
 $ cap <stage> committed:generate
 ```
+
+## What's with the unicorn?
+
+<div align="center">
+  <a href="https://github.com/sambauers/capistrano-committed"><img width="640" src="https://github.com/sambauers/capistrano-committed/raw/master/icons/capricorn_equation.png" alt="Capistrano + GitHub API gem = Capistrano Committed gem" /></a>
+</div>
+
+* [Capistrano](http://capistranorb.com)
+* [GitHub API gem](https://github.com/peter-murach/github)
+
+

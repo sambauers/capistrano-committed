@@ -2,6 +2,11 @@ require 'i18n'
 
 en = {
   error: {
+    helpers: {
+      valid_param:          '`%{method}` requires a valid %{param}.',
+      github_service_error: 'There seems to be a problem with the GitHub service.',
+      github_client_error:  'There seems to be a problem with the request that was made to GitHub, check that your settings are correct.'
+    },
     prerequisites: {
       nil:                      '`:%{variable}` variable is `nil`, it needs to contain the %{name} name.',
       empty:                    '`:%{variable}` variable is empty, it needs to contain the %{name} name.',

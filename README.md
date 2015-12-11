@@ -106,6 +106,9 @@ set :committed_issue_match, '\[\s?([A-Z0-9]+\-[0-9]+)\s?\]'
 # "%s" will be replaced with the issue number. Setting this to `nil` will also
 # disable issue matching altogether.
 set :committed_issue_url, 'https://example.jira.com/browse/%s'
+
+# Register deployments in GitHub via the GitHub Deployments API
+set :committed_deployments, false
 ```
 
 Once your required settings are all in place, you can generate a report by running:

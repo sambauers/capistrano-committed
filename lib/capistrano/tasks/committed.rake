@@ -289,14 +289,7 @@ namespace :committed do
               urls = ::Capistrano::Committed.get_issue_urls(fetch(:committed_issue_match),
                                                             fetch(:committed_issue_url),
                                                             entry[:info][:title] + entry[:info][:body])
-              unless urls.empty?
-                output << format('   %s',
-                                 t('committed.output.issue_links'))
-                urls.each do |url|
-                  output << format('   - %s', url)
-                end
-                output << ''
-              end
+              output += ::Capistrano::Committed.format_issue_urls(urls)
 
               # Merger details
               output << format('   %s',
@@ -334,14 +327,8 @@ namespace :committed do
                     urls = ::Capistrano::Committed.get_issue_urls(fetch(:committed_issue_match),
                                                                   fetch(:committed_issue_url),
                                                                   commit[:commit][:message])
-                    unless urls.empty?
-                      output << format('   |   %s',
-                                       t('committed.output.issue_links'))
-                      urls.each do |url|
-                        output << format('   |   - %s', url)
-                      end
-                      output << '   |'
-                    end
+                    output += ::Capistrano::Committed.format_issue_urls(urls,
+                                                                        '   |')
                   end
 
                   # Committer details
@@ -382,14 +369,7 @@ namespace :committed do
                 urls = ::Capistrano::Committed.get_issue_urls(fetch(:committed_issue_match),
                                                               fetch(:committed_issue_url),
                                                               entry[:info][:commit][:message])
-                unless urls.empty?
-                  output << format('   %s',
-                                   t('committed.output.issue_links'))
-                  urls.each do |url|
-                    output << format('   - %s', url)
-                  end
-                  output << ''
-                end
+                output += ::Capistrano::Committed.format_issue_urls(urls)
               end
 
               # Committer details

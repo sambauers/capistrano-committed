@@ -26,6 +26,16 @@ module Capistrano
         return unless matches
         matches.map { |m| format(url_pattern, m[0]) }
       end
+
+      def format_issue_urls(urls, pad = '')
+        return [] if urls.empty?
+        output = []
+        output << format('%s   %s', pad, t('committed.output.issue_links'))
+        urls.each do |url|
+          output << format('%s   - %s', pad, url)
+        end
+        output << format('%s', pad)
+      end
     end
   end
 end

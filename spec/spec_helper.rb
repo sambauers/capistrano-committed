@@ -1,5 +1,7 @@
-require "codeclimate-test-reporter"
-CodeClimate::TestReporter.start
+if ENV['TRAVIS_RUBY_VERSION'] && Gem::Version.new(ENV['TRAVIS_RUBY_VERSION']) > Gem::Version.new('2.2')
+  require "codeclimate-test-reporter"
+  CodeClimate::TestReporter.start
+end
 
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 $LOAD_PATH.unshift File.expand_path('../../lib/committed', __FILE__)

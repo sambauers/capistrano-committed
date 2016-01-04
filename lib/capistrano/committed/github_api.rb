@@ -6,14 +6,18 @@ module Capistrano
       def initialize(config_options = {})
         validate('config_options', config_options, Hash, __callee__)
 
-        config_options.merge!(
-          adapter: :net_http,
-          ssl: { verify: false },
-          per_page: 100,
-          user_agent: 'Committed Ruby Gem (via Github API Ruby Gem)'
-        )
+        options = { adapter: :net_http,
+                    ssl: { verify: false },
+                    per_page: 100,
+                    user_agent: 'Committed Ruby Gem (via Github API Ruby Gem)' }
 
-        @client = ::Github.new config_options
+        options.merge! config_options
+
+        @client = ::Github.new options
+      end
+
+      def client
+        @client
       end
 
       def get_commit(user, repo, sha)

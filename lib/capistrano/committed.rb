@@ -8,7 +8,7 @@ module Capistrano
       def get_issue_urls(issue_pattern, url_pattern, message)
         fail TypeError, t('committed.error.helpers.valid_param',
                           method: __callee__,
-                          param: 'issue_param') unless
+                          param: 'issue_pattern') unless
                             issue_pattern.is_a?(String) ||
                             issue_pattern.is_a?(Regexp)
 
@@ -23,12 +23,12 @@ module Capistrano
                             message.is_a?(String)
 
         matches = message.scan(Regexp.new(issue_pattern))
-        return unless matches
+        return [] unless matches
         matches.map { |m| format(url_pattern, m[0]) }
       end
 
       def format_issue_urls(urls, pad = '')
-        return [] if urls.empty?
+        return [] if urls.nil? || urls.empty?
         output = []
         output << format('%s   %s', pad, t('committed.output.issue_links'))
         urls.each do |url|

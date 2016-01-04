@@ -6,8 +6,8 @@
 
 [![Gem Version](https://badge.fury.io/rb/capistrano-committed.svg)](https://badge.fury.io/rb/capistrano-committed)
 [![Build Status](https://travis-ci.org/sambauers/capistrano-committed.svg?branch=master)](https://travis-ci.org/sambauers/capistrano-committed)
-[![Code Climate](https://codeclimate.com/github/sambauers/capistrano-committed/badges/gpa.svg)](https://codeclimate.com/github/sambauers/capistrano-committed)
 [![Test Coverage](https://codeclimate.com/github/sambauers/capistrano-committed/badges/coverage.svg)](https://codeclimate.com/github/sambauers/capistrano-committed/coverage)
+[![Code Climate](https://codeclimate.com/github/sambauers/capistrano-committed/badges/gpa.svg)](https://codeclimate.com/github/sambauers/capistrano-committed)
 [![Issue Count](https://codeclimate.com/github/sambauers/capistrano-committed/badges/issue_count.svg)](https://codeclimate.com/github/sambauers/capistrano-committed)
 [![Dependency Status](https://gemnasium.com/sambauers/capistrano-committed.svg)](https://gemnasium.com/sambauers/capistrano-committed)
 

@@ -1,3 +1,5 @@
+puts ENV['TRAVIS_RUBY_VERSION']
+
 if ENV['TRAVIS_RUBY_VERSION'] && Gem::Version.new(ENV['TRAVIS_RUBY_VERSION']) > Gem::Version.new('2.2')
   require "codeclimate-test-reporter"
   CodeClimate::TestReporter.start

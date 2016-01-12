@@ -103,7 +103,14 @@ set :committed_output_path, '%s/public/committed.txt'
 # Setting this to `nil` will disable issue matching altogether. Note that this
 # setting should specify a string, not a Ruby Regexp object. Specifying a Regexp
 # object might work, but it is not tested.
-set :committed_issue_match, '\[\s?([A-Z0-9]+\-[0-9]+)\s?\]'
+set :committed_issue_match, '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]'
+
+# This is an array of methods which should be applied to matched issue numbers
+# before being formatted into the issue URL. An example might be to transform
+# all matched issue numbers to uppercase, e.g. [project-123] to [PROJECT-123].
+# The method names should be listed as symbols, e.g. [:upcase] and must be
+# applicable to strings.
+set :committed_issue_postprocess, -> { [] }
 
 # This is the URL structure for issues which are found. The default is for a
 # JIRA on Demand instance - e.g. https://example.jira.com/browse/ABC-12345

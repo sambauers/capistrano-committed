@@ -287,6 +287,7 @@ namespace :committed do
               # Get any issue numbers referred to in the commit info and print
               # links to them
               urls = ::Capistrano::Committed.get_issue_urls(fetch(:committed_issue_match),
+                                                            fetch(:committed_issue_postprocess),
                                                             fetch(:committed_issue_url),
                                                             entry[:info][:title] + entry[:info][:body])
               output += ::Capistrano::Committed.format_issue_urls(urls)
@@ -325,6 +326,7 @@ namespace :committed do
                     # Get any issue numbers referred to in the commit message
                     # and print links to them
                     urls = ::Capistrano::Committed.get_issue_urls(fetch(:committed_issue_match),
+                                                                  fetch(:committed_issue_postprocess),
                                                                   fetch(:committed_issue_url),
                                                                   commit[:commit][:message])
                     output += ::Capistrano::Committed.format_issue_urls(urls,
@@ -367,6 +369,7 @@ namespace :committed do
                 # Get any issue numbers referred to in the commit message and
                 # print links to them
                 urls = ::Capistrano::Committed.get_issue_urls(fetch(:committed_issue_match),
+                                                              fetch(:committed_issue_postprocess),
                                                               fetch(:committed_issue_url),
                                                               entry[:info][:commit][:message])
                 output += ::Capistrano::Committed.format_issue_urls(urls)
@@ -414,16 +417,17 @@ end
 namespace :load do
   task :defaults do
     # See README for descriptions of each setting
-    set :committed_user,            -> { nil }
-    set :committed_repo,            -> { nil }
-    set :committed_revision_line,   -> { t('revision_log_message') }
-    set :committed_github_config,   -> { {} }
-    set :committed_revision_limit,  -> { 10 }
-    set :committed_commit_buffer,   -> { 1 }
-    set :committed_output_path,     -> { '%s/public/committed.txt' }
-    set :committed_issue_match,     -> { '\[\s?([A-Z0-9]+\-[0-9]+)\s?\]' }
-    set :committed_issue_url,       -> { 'https://example.jira.com/browse/%s' }
-    set :committed_deployments,     -> { false }
-    set :committed_deployment_id,   -> { nil }
+    set :committed_user,              -> { nil }
+    set :committed_repo,              -> { nil }
+    set :committed_revision_line,     -> { t('revision_log_message') }
+    set :committed_github_config,     -> { {} }
+    set :committed_revision_limit,    -> { 10 }
+    set :committed_commit_buffer,     -> { 1 }
+    set :committed_output_path,       -> { '%s/public/committed.txt' }
+    set :committed_issue_match,       -> { '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]' }
+    set :committed_issue_postprocess, -> { [] }
+    set :committed_issue_url,         -> { 'https://example.jira.com/browse/%s' }
+    set :committed_deployments,       -> { false }
+    set :committed_deployment_id,     -> { nil }
   end
 end

@@ -5,12 +5,24 @@ require 'capistrano/committed/github_api'
 module Capistrano
   module Committed
     class << self
-      def get_issue_urls(issue_pattern, url_pattern, message)
+      def get_issue_urls(issue_pattern, postprocess, url_pattern, message)
         fail TypeError, t('committed.error.helpers.valid_param',
                           method: __callee__,
                           param: 'issue_pattern') unless
                             issue_pattern.is_a?(String) ||
                             issue_pattern.is_a?(Regexp)
+
+        fail TypeError, t('committed.error.helpers.valid_param',
+                          method: __callee__,
+                          param: 'postprocess') unless
+                            postprocess.is_a?(Array)
+
+        postprocess.each { |method|
+          fail TypeError, t('committed.error.helpers.valid_param',
+                          method: __callee__,
+                          param: format('postprocess[:%s]', method.to_s)) unless
+                            method.is_a?(Symbol)
+        }
 
         fail TypeError, t('committed.error.helpers.valid_param',
                           method: __callee__,
@@ -24,7 +36,13 @@ module Capistrano
 
         matches = message.scan(Regexp.new(issue_pattern))
         return [] unless matches
-        matches.map { |m| format(url_pattern, m[0]) }
+        matches.map { |match|
+          issue = match[0]
+          postprocess.each { |method|
+            issue = issue.send(method)
+          }
+          format(url_pattern, issue)
+        }
       end
 
       def format_issue_urls(urls, pad = '')

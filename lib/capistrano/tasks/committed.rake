@@ -104,6 +104,7 @@ namespace :committed do
       revisions = {}
       lines.each do |line|
         matches = search.match(line)
+        next if matches.nil?
         next unless matches[:branch].to_s == fetch(:branch).to_s
         revisions[matches[:sha]] = {
           branch:   matches[:branch],

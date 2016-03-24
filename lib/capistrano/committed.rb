@@ -6,12 +6,24 @@ module Capistrano
   module Committed
     class << self
       def revision_search_regex(revision_line)
+        check_type __callee__, 'revision_line', revision_line.is_a?(String)
+
         search = Regexp.escape(revision_line)
         search = search.gsub('%\{', '(?<').gsub('\}', '>.+)')
         Regexp.new(search)
       end
 
       def get_revisions_from_lines(lines, search, branch, limit)
+        check_type __callee__, 'lines', lines.is_a?(Array)
+        lines.each_with_index { |line, index|
+          check_type __callee__,
+                     format('lines[%d]', index),
+                     line.is_a?(String)
+        }
+        check_type __callee__, 'search', search.is_a?(Regexp)
+        check_type __callee__, 'branch', branch.is_a?(String)
+        check_type __callee__, 'limit', limit.is_a?(Integer)
+
         revisions = {}
         lines.each do |line|
           matches = search.match(line)
@@ -74,6 +86,8 @@ module Capistrano
       end
 
       def pad_revisions(revisions)
+        check_type __callee__, 'revisions', revisions.is_a?(Hash)
+
         unless revisions.empty?
           # Sort revisions by release date
           revisions = revisions.sort_by { |_release, matches| matches[:release] }.to_h

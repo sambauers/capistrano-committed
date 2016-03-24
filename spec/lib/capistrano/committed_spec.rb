@@ -10,6 +10,10 @@ module Capistrano
       let(:revision_line) { 'Branch %{branch} (at %{sha}) deployed as release %{release} by %{user}' }
       let(:revision_line_escaped) { 'Branch\ (?<branch>.+)\ \(at\ (?<sha>.+)\)\ deployed\ as\ release\ (?<release>.+)\ by\ (?<user>.+)' }
 
+      it 'fails if revision_line is not a String' do
+        expect{ Committed.revision_search_regex(nil) }.to raise_error TypeError
+      end
+
       it 'returns Regexp' do
         expect(Committed.revision_search_regex(revision_line)).to be_a Regexp
       end
@@ -65,6 +69,26 @@ module Capistrano
                                         '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {} },
                                         previous: { entries: {} }
       } }
+
+      it 'fails if lines is not an Array' do
+        expect{ Committed.get_revisions_from_lines(nil, search, 'master', 10) }.to raise_error TypeError
+      end
+
+      it 'fails if a lines item is not a String' do
+        expect{ Committed.get_revisions_from_lines(['one', nil, 'three'], search, 'master', 10) }.to raise_error TypeError
+      end
+
+      it 'fails if search is not a Regexp' do
+        expect{ Committed.get_revisions_from_lines(lines, nil, 'master', 10) }.to raise_error TypeError
+      end
+
+      it 'fails if branch is not a String' do
+        expect{ Committed.get_revisions_from_lines(lines, search, nil, 10) }.to raise_error TypeError
+      end
+
+      it 'fails if limit is not an Integer' do
+        expect{ Committed.get_revisions_from_lines(lines, search, 'master', nil) }.to raise_error TypeError
+      end
 
       it 'returns lines' do
         expect(Committed.get_revisions_from_lines(lines, search, 'master', 10)).to eq revisions

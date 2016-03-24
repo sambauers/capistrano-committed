@@ -101,8 +101,7 @@ set :committed_output_path, '%s/public/committed.txt'
 # descriptions. This example matches JIRA numbers enclosed in square braces -
 # e.g. "[ABC-12345]" with the part inside the braces being captured "ABC-12345".
 # Setting this to `nil` will disable issue matching altogether. Note that this
-# setting should specify a string, not a Ruby Regexp object. Specifying a Regexp
-# object might work, but it is not tested.
+# setting should specify a string, not a Ruby Regexp object.
 set :committed_issue_match, '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]'
 
 # This is an array of methods which should be applied to matched issue numbers

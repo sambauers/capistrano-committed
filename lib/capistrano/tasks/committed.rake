@@ -95,10 +95,10 @@ namespace :committed do
 
       # Build the regex to search for revision data in the log, by default this
       # is the localised string from Capistrano
-      search = revision_search_regex(fetch(:committed_revision_line))
+      search = ::Capistrano::Committed.revision_search_regex(fetch(:committed_revision_line))
 
       # Build the revisions hash
-      revisions = get_revisions_from_lines(lines, search, fetch(:branch), fetch(:committed_revision_limit))
+      revisions = ::Capistrano::Committed.get_revisions_from_lines(lines, search, fetch(:branch), fetch(:committed_revision_limit))
 
       # No revisions, no log
       if revisions.empty?

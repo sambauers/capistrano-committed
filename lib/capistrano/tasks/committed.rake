@@ -95,27 +95,10 @@ namespace :committed do
 
       # Build the regex to search for revision data in the log, by default this
       # is the localised string from Capistrano
-      search = fetch(:committed_revision_line)
-      search = Regexp.escape(search)
-      search = search.gsub('%\{', '(?<').gsub('\}', '>.+)')
-      search = Regexp.new(search)
+      search = revision_search_regex(fetch(:committed_revision_line))
 
       # Build the revisions hash
-      revisions = {}
-      lines.each do |line|
-        matches = search.match(line)
-        next if matches.nil?
-        next unless matches[:branch].to_s == fetch(:branch).to_s
-        revisions[matches[:sha]] = {
-          branch:   matches[:branch],
-          sha:      matches[:sha],
-          release:  matches[:release],
-          user:     matches[:user],
-          entries:  {}
-        }
-        # Only store a certain number of revisions
-        break if revisions.count == fetch(:committed_revision_limit)
-      end
+      revisions = get_revisions_from_lines(lines, search, fetch(:branch), fetch(:committed_revision_limit))
 
       # No revisions, no log
       if revisions.empty?
@@ -124,14 +107,6 @@ namespace :committed do
                stage: fetch(:stage).to_s)
         return
       end
-
-      # Sort revisions by release date
-      revisions = revisions.sort_by { |_sha, matches| matches[:release] }.to_h
-      # Add the "next" revision
-      revisions.merge!(next: { entries: {} })
-      # Reverse the order of revisions in the hash (most recent first)
-      revisions = revisions.to_a.reverse.to_h
-      revisions.merge!(previous: { entries: {} })
 
       # Initialize the GitHub API client
       github = ::Capistrano::Committed::GithubApi.new(fetch(:committed_github_config))

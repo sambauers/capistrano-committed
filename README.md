@@ -118,7 +118,8 @@ set :committed_issue_postprocess, -> { [] }
 # disable issue matching altogether.
 set :committed_issue_url, 'https://example.jira.com/browse/%s'
 
-# Register deployments in GitHub via the GitHub Deployments API
+# Register deployments in GitHub via the GitHub Deployments API (not
+# implemented yet)
 set :committed_deployments, false
 ```
 

@@ -5,6 +5,31 @@ require 'capistrano/committed/github_api'
 module Capistrano
   module Committed
     class << self
+      def revision_search_regex(revision_line)
+        search = Regexp.escape(revision_line)
+        search = search.gsub('%\{', '(?<').gsub('\}', '>.+)')
+        Regexp.new(search)
+      end
+
+      def get_revisions_from_lines(lines, search, branch, limit)
+        revisions = {}
+        lines.each do |line|
+          matches = search.match(line)
+          next if matches.nil?
+          next unless matches[:branch].to_s == branch.to_s
+          revisions[matches[:release]] = {
+            branch:   matches[:branch],
+            sha:      matches[:sha],
+            release:  matches[:release],
+            user:     matches[:user],
+            entries:  {}
+          }
+          # Only store a certain number of revisions
+          break if revisions.count == limit
+        end
+        pad_revisions(revisions)
+      end
+
       def get_issue_urls(issue_pattern, postprocess, url_pattern, message)
         check_type __callee__,
                    'issue_pattern',
@@ -46,6 +71,19 @@ module Capistrano
         fail TypeError, t('committed.error.helpers.valid_param',
                         method: method,
                         param: param) unless condition
+      end
+
+      def pad_revisions(revisions)
+        unless revisions.empty?
+          # Sort revisions by release date
+          revisions = revisions.sort_by { |_release, matches| matches[:release] }.to_h
+          # Add the "next" revision
+          revisions.merge!(next: { entries: {} })
+          # Reverse the order of revisions in the hash (most recent first)
+          revisions = revisions.to_a.reverse.to_h
+          revisions.merge!(previous: { entries: {} })
+        end
+        revisions.to_h
       end
     end
   end

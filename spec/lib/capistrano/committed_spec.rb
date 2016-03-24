@@ -6,6 +6,83 @@ module Capistrano
       expect(Committed::VERSION).not_to be nil
     end
 
+    describe 'revision_search_regex' do
+      let(:revision_line) { 'Branch %{branch} (at %{sha}) deployed as release %{release} by %{user}' }
+      let(:revision_line_escaped) { 'Branch\ (?<branch>.+)\ \(at\ (?<sha>.+)\)\ deployed\ as\ release\ (?<release>.+)\ by\ (?<user>.+)' }
+
+      it 'returns Regexp' do
+        expect(Committed.revision_search_regex(revision_line)).to be_a Regexp
+      end
+
+      it 'returns Regexp with escaped pattern' do
+        expect(Committed.revision_search_regex(revision_line).source).to eq revision_line_escaped
+      end
+    end
+
+    describe 'get_revisions_from_lines' do
+      let(:lines) { ['Branch master (at 08e0390) deployed as release 20160119003754 by jim',
+                     'Branch master (at 08e0390) deployed as release 20160119002603 by daniel',
+                     'Branch master (at 66fcf81) deployed as release 20160118044318 by daniel',
+                     'Branch master (at e5535c4) deployed as release 20160113003755 by mike',
+                     'Branch master (at 3b3e45d) deployed as release 20160106034830 by sam'] }
+      let(:search) { Committed.revision_search_regex('Branch %{branch} (at %{sha}) deployed as release %{release} by %{user}') }
+      let(:revisions) { { next: { entries: {} },
+                          '20160119003754' => { branch: 'master', sha: '08e0390', release: '20160119003754', user: 'jim', entries: {} },
+                          '20160119002603' => { branch: 'master', sha: '08e0390', release: '20160119002603', user: 'daniel', entries: {} },
+                          '20160118044318' => { branch: 'master', sha: '66fcf81', release: '20160118044318', user: 'daniel', entries: {} },
+                          '20160113003755' => { branch: 'master', sha: 'e5535c4', release: '20160113003755', user: 'mike', entries: {} },
+                          '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {} },
+                          previous: { entries: {} }
+      } }
+      let(:revisions_to_limit) { { next: { entries: {} },
+                          '20160119003754' => { branch: 'master', sha: '08e0390', release: '20160119003754', user: 'jim', entries: {} },
+                          '20160119002603' => { branch: 'master', sha: '08e0390', release: '20160119002603', user: 'daniel', entries: {} },
+                          previous: { entries: {} }
+      } }
+      let(:lines_with_branches) { ['Branch master (at 08e0390) deployed as release 20160119003754 by jim',
+                                   'Branch other (at 08e0390) deployed as release 20160119002603 by daniel',
+                                   'Branch other (at 66fcf81) deployed as release 20160118044318 by daniel',
+                                   'Branch master (at e5535c4) deployed as release 20160113003755 by mike',
+                                   'Branch master (at 3b3e45d) deployed as release 20160106034830 by sam'] }
+      let(:revisions_in_branch) { { next: { entries: {} },
+                          '20160119003754' => { branch: 'master', sha: '08e0390', release: '20160119003754', user: 'jim', entries: {} },
+                          '20160113003755' => { branch: 'master', sha: 'e5535c4', release: '20160113003755', user: 'mike', entries: {} },
+                          '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {} },
+                          previous: { entries: {} }
+      } }
+      let(:lines_with_rollback) { [
+                                   'Branch master (at 5a4f743) deployed as release 20160121001342 by cathy',
+                                   'Branch master (at 66fcf81) deployed as release 20160119003754 by jim',
+                                   'daniel rolled back to release 20160113003755',
+                                   'Branch master (at 08e0390) deployed as release 20160119002603 by daniel',
+                                   'Branch master (at e5535c4) deployed as release 20160113003755 by mike',
+                                   'Branch master (at 3b3e45d) deployed as release 20160106034830 by sam'] }
+      let(:revisions_with_rollback) { { next: { entries: {} },
+                                        '20160121001342' => { branch: 'master', sha: '5a4f743', release: '20160121001342', user: 'cathy', entries: {} },
+                                        '20160119003754' => { branch: 'master', sha: '66fcf81', release: '20160119003754', user: 'jim', entries: {} },
+                                        '20160119002603' => { branch: 'master', sha: '08e0390', release: '20160119002603', user: 'daniel', entries: {} },
+                                        '20160113003755' => { branch: 'master', sha: 'e5535c4', release: '20160113003755', user: 'mike', entries: {} },
+                                        '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {} },
+                                        previous: { entries: {} }
+      } }
+
+      it 'returns lines' do
+        expect(Committed.get_revisions_from_lines(lines, search, 'master', 10)).to eq revisions
+      end
+
+      it 'returns lines up to limit' do
+        expect(Committed.get_revisions_from_lines(lines, search, 'master', 2)).to eq revisions_to_limit
+      end
+
+      it 'returns lines in given branch' do
+        expect(Committed.get_revisions_from_lines(lines_with_branches, search, 'master', 10)).to eq revisions_in_branch
+      end
+
+      it 'returns lines and ignores rollbacks' do
+        expect(Committed.get_revisions_from_lines(lines_with_rollback, search, 'master', 10)).to eq revisions_with_rollback
+      end
+    end
+
     describe 'get_issue_urls' do
       let(:issue_pattern) { '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]' }
       let(:postprocess) { [] }

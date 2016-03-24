@@ -62,41 +62,41 @@ module Capistrano
         end
       end
 
-      def register_deployment(user, repo, stage, branch = 'master')
-        validate_user_and_repo(user, repo, __callee__)
-        validate('stage', stage, String, __callee__)
-        validate('branch', branch, String, __callee__)
+      # def register_deployment(user, repo, stage, branch = 'master')
+      #   validate_user_and_repo(user, repo, __callee__)
+      #   validate('stage', stage, String, __callee__)
+      #   validate('branch', branch, String, __callee__)
 
-        api_call do
-          @client.repos.deployments.create(user:              user,
-                                           repo:              repo,
-                                           environment:       stage,
-                                           ref:               branch,
-                                           auto_merge:        false,
-                                           required_contexts: [])
-        end
-      end
+      #   api_call do
+      #     @client.repos.deployments.create(user:              user,
+      #                                      repo:              repo,
+      #                                      environment:       stage,
+      #                                      ref:               branch,
+      #                                      auto_merge:        false,
+      #                                      required_contexts: [])
+      #   end
+      # end
 
-      def register_deployment_status(user, repo, id, state)
-        validate_user_and_repo(user, repo, __callee__)
-        validate('id', id, Integer, __callee__)
+      # def register_deployment_status(user, repo, id, state)
+      #   validate_user_and_repo(user, repo, __callee__)
+      #   validate('id', id, Integer, __callee__)
 
-        valid_states = %w(pending success error failure)
-        state = state.to_s
-        unless valid_states.include?(state)
-          message = t('committed.error.helpers.valid_param',
-                      method: __callee__,
-                      param: 'state')
-          fail TypeError, message
-        end
+      #   valid_states = %w(pending success error failure)
+      #   state = state.to_s
+      #   unless valid_states.include?(state)
+      #     message = t('committed.error.helpers.valid_param',
+      #                 method: __callee__,
+      #                 param: 'state')
+      #     fail TypeError, message
+      #   end
 
-        api_call do
-          @client.repos.deployments.create_status(user:   user,
-                                                  repo:   repo,
-                                                  id:     id,
-                                                  state:  state)
-        end
-      end
+      #   api_call do
+      #     @client.repos.deployments.create_status(user:   user,
+      #                                             repo:   repo,
+      #                                             id:     id,
+      #                                             state:  state)
+      #   end
+      # end
 
       private
 

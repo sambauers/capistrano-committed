@@ -117,7 +117,7 @@ namespace :committed do
         next if release == :next || release == :previous
         commit = github.get_commit(fetch(:committed_user),
                                    fetch(:committed_repo),
-                                   reveision[:sha])
+                                   revision[:sha])
         unless commit.nil?
           earliest_date = commit[:commit][:committer][:date]
           revisions[release][:date] = earliest_date

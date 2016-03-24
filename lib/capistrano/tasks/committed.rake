@@ -220,11 +220,11 @@ namespace :committed do
 
       # Loop through the revisions to create the output
       output = []
-      revisions.each do |sha, revision|
+      revisions.each do |release, revision|
         # Build the revision header
         output << ''
         output << ('=' * 94)
-        case sha
+        case release
         when :next
           output << t('committed.output.next_release')
         when :previous

@@ -113,14 +113,14 @@ namespace :committed do
 
       # Get the actual date of the commit referenced to by the revision
       earliest_date = nil
-      revisions.each do |sha, _revision|
-        next if sha == :next || sha == :previous
+      revisions.each do |release, revision|
+        next if release == :next || release == :previous
         commit = github.get_commit(fetch(:committed_user),
                                    fetch(:committed_repo),
-                                   sha)
+                                   reveision[:sha])
         unless commit.nil?
           earliest_date = commit[:commit][:committer][:date]
-          revisions[sha][:date] = earliest_date
+          revisions[release][:date] = earliest_date
         end
       end
 
@@ -240,7 +240,8 @@ namespace :committed do
         output << ''
 
         # Loop through the entries in this revision
-        revision[:entries].sort_by { |date, _entries| date }.reverse.to_h.each do |_date, entries|
+        items = Hash[revision[:entries].sort_by { |date, _entries| date }.reverse]
+        items.each do |_date, entries|
           entries.each do |entry|
             case entry[:type]
             when :pull_request

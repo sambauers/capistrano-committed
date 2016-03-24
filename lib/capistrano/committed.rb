@@ -1,6 +1,7 @@
 require 'capistrano/committed/version'
 require 'capistrano/committed/i18n'
 require 'capistrano/committed/github_api'
+require 'pp'
 
 module Capistrano
   module Committed
@@ -90,14 +91,13 @@ module Capistrano
 
         unless revisions.empty?
           # Sort revisions by release date
-          revisions = revisions.sort_by { |_release, matches| matches[:release] }.to_h
-          # Add the "next" revision
-          revisions.merge!(next: { entries: {} })
-          # Reverse the order of revisions in the hash (most recent first)
-          revisions = revisions.to_a.reverse.to_h
+          revisions = Hash[revisions.sort { |a, b| b[1][:release] <=> a[1][:release] }]
+          # Add the "previous" revision
           revisions.merge!(previous: { entries: {} })
+          # Add the "next" revision
+          revisions = {next: { entries: {} }}.merge(revisions)
         end
-        revisions.to_h
+        revisions
       end
     end
   end

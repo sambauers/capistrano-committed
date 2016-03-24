@@ -112,17 +112,10 @@ namespace :committed do
       github = ::Capistrano::Committed::GithubApi.new(fetch(:committed_github_config))
 
       # Get the actual date of the commit referenced to by the revision
-      earliest_date = nil
-      revisions.each do |release, revision|
-        next if release == :next || release == :previous
-        commit = github.get_commit(fetch(:committed_user),
-                                   fetch(:committed_repo),
-                                   revision[:sha])
-        unless commit.nil?
-          earliest_date = commit[:commit][:committer][:date]
-          revisions[release][:date] = earliest_date
-        end
-      end
+      revisions = ::Capistrano::Committed.add_dates_to_revisions(revisions, github, fetch(:committed_user), fetch(:committed_repo))
+
+      # Get the earliest revision date
+      earliest_date = ::Capistrano::Committed.get_earliest_date_from_revisions(revisions)
 
       # No commit data on revisions, no log
       if earliest_date.nil?
@@ -134,7 +127,7 @@ namespace :committed do
 
       # Go back an extra N day
       buffer = fetch(:committed_commit_buffer) * 24 * 60 * 60
-      earliest_date = (Time.parse(earliest_date) - buffer).iso8601
+      earliest_date = (earliest_date - buffer).iso8601
       revisions[:previous][:date] = earliest_date
 
       # Get all the commits on this branch

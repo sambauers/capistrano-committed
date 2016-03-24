@@ -1,7 +1,6 @@
 require 'capistrano/committed/version'
 require 'capistrano/committed/i18n'
 require 'capistrano/committed/github_api'
-require 'pp'
 
 module Capistrano
   module Committed
@@ -41,6 +40,28 @@ module Capistrano
           break if revisions.count == limit
         end
         pad_revisions(revisions)
+      end
+
+      def add_dates_to_revisions(revisions, github, git_user, git_repo)
+        check_type __callee__, 'revisions', revisions.is_a?(Hash)
+        check_type __callee__, 'github', github.is_a?(GithubApi)
+
+        revisions.each do |release, revision|
+          next if release == :next || release == :previous
+          commit = github.get_commit(git_user,
+                                     git_repo,
+                                     revision[:sha])
+          unless commit.nil?
+            revisions[release][:date] = commit[:commit][:committer][:date]
+          end
+        end
+        revisions
+      end
+
+      def get_earliest_date_from_revisions(revisions)
+        check_type __callee__, 'revisions', revisions.is_a?(Hash)
+
+        revisions.values.map{ |r| Time.parse(r[:date]) unless r[:date].nil? }.compact.min
       end
 
       def get_issue_urls(issue_pattern, postprocess, url_pattern, message)

@@ -125,9 +125,8 @@ namespace :committed do
         return
       end
 
-      # Go back an extra N day
-      buffer = fetch(:committed_commit_buffer) * 24 * 60 * 60
-      earliest_date = (earliest_date - buffer).iso8601
+      # Go back an extra N days
+      earliest_date = ::Capistrano::Committed.add_buffer_to_time(earliest_date, fetch(:committed_commit_buffer))
       revisions[:previous][:date] = earliest_date
 
       # Get all the commits on this branch

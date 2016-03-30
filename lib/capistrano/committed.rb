@@ -44,7 +44,9 @@ module Capistrano
 
       def add_dates_to_revisions(revisions, github, git_user, git_repo)
         check_type __callee__, 'revisions', revisions.is_a?(Hash)
-        check_type __callee__, 'github', github.is_a?(GithubApi)
+        check_type __callee__, 'github', github.is_a?(Capistrano::Committed::GithubApi)
+        check_type __callee__, 'git_user', git_user.is_a?(String)
+        check_type __callee__, 'git_repo', git_repo.is_a?(String)
 
         revisions.each do |release, revision|
           next if release == :next || release == :previous
@@ -62,6 +64,19 @@ module Capistrano
         check_type __callee__, 'revisions', revisions.is_a?(Hash)
 
         revisions.values.map{ |r| Time.parse(r[:date]) unless r[:date].nil? }.compact.min
+      end
+
+      def days_to_seconds(days)
+        check_type __callee__, 'days', days.is_a?(Numeric)
+
+        days * 24 * 60 * 60
+      end
+
+      def add_buffer_to_time(time, buffer_in_days)
+        check_type __callee__, 'time', time.is_a?(Time)
+        check_type __callee__, 'buffer_in_days', buffer_in_days.is_a?(Numeric)
+
+        (time - days_to_seconds(buffer_in_days)).iso8601
       end
 
       def get_issue_urls(issue_pattern, postprocess, url_pattern, message)

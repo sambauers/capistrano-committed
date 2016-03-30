@@ -107,6 +107,110 @@ module Capistrano
       end
     end
 
+    describe 'add_dates_to_revisions' do
+      let(:revisions) { { next: { entries: {} },
+                          '20160119003754' => { branch: 'master', sha: '08e0390', release: '20160119003754', user: 'jim', entries: {} },
+                          '20160119002603' => { branch: 'master', sha: '08e0390', release: '20160119002603', user: 'daniel', entries: {} },
+                          '20160118044318' => { branch: 'master', sha: '66fcf81', release: '20160118044318', user: 'daniel', entries: {} },
+                          '20160113003755' => { branch: 'master', sha: 'e5535c4', release: '20160113003755', user: 'mike', entries: {} },
+                          '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {} },
+                          previous: { entries: {} }
+      } }
+      let(:github) { Committed::GithubApi.new() }
+      let(:git_user) { 'username' }
+      let(:git_repo) { 'repository' }
+
+      it 'fails if revisions is not a Hash' do
+        expect{ Committed.add_dates_to_revisions(nil, github, git_user, git_repo) }.to raise_error TypeError
+      end
+
+      it 'fails if github is not a GitHubApi object' do
+        expect{ Committed.add_dates_to_revisions(revisions, nil, git_user, git_repo) }.to raise_error TypeError
+      end
+
+      it 'fails if git_user is not a String' do
+        expect{ Committed.add_dates_to_revisions(revisions, github, nil, git_repo) }.to raise_error TypeError
+      end
+
+      it 'fails if git_repo is not a String' do
+        expect{ Committed.add_dates_to_revisions(revisions, github, git_user, nil) }.to raise_error TypeError
+      end
+    end
+
+    describe 'get_earliest_date_from_revisions' do
+      let(:revisions) { { next: { entries: {} },
+                          '20160119003754' => { branch: 'master', sha: '08e0390', release: '20160119003754', user: 'jim', entries: {}, date: '2015-08-11T05:00:00+11:00' },
+                          '20160119002603' => { branch: 'master', sha: '08e0390', release: '20160119002603', user: 'daniel', entries: {}, date: '2015-08-11T04:00:00+11:00' },
+                          '20160118044318' => { branch: 'master', sha: '66fcf81', release: '20160118044318', user: 'daniel', entries: {}, date: '2015-08-11T03:00:00+11:00' },
+                          '20160113003755' => { branch: 'master', sha: 'e5535c4', release: '20160113003755', user: 'mike', entries: {}, date: '2015-08-11T02:00:00+11:00' },
+                          '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {}, date: '2015-08-11T01:00:00+11:00' },
+                          previous: { entries: {} }
+      } }
+
+      it 'fails if revisions is not a Hash' do
+        expect{ Committed.get_earliest_date_from_revisions(nil) }.to raise_error TypeError
+      end
+
+      it 'returns nil if revisions is empty' do
+        expect(Committed.get_earliest_date_from_revisions({})).to eq nil
+      end
+
+      it 'returns earliest date' do
+        expect(Committed.get_earliest_date_from_revisions(revisions)).to eq Time.parse('2015-08-11T01:00:00+11:00')
+      end
+    end
+
+    describe 'days_to_seconds' do
+      let(:days_integer) { 2 }
+      let(:days_float) { 2.5 }
+      let(:days_string) { 'two' }
+
+      it 'fails if revisions is not a Numeric (nil)' do
+        expect{ Committed.days_to_seconds(nil) }.to raise_error TypeError
+      end
+
+      it 'fails if revisions is not a Numeric (String)' do
+        expect{ Committed.days_to_seconds(days_string) }.to raise_error TypeError
+      end
+
+      it 'returns 172800 when days is 2' do
+        expect(Committed.days_to_seconds(days_integer)).to eq 172800
+      end
+
+      it 'returns 216000 when days is 2.5' do
+        expect(Committed.days_to_seconds(days_float)).to eq 216000
+      end
+    end
+
+    describe 'add_buffer_to_time' do
+      let(:time) { Time.parse('2010-10-10 10:00:00 +0000') }
+      let(:days_integer) { 2 }
+      let(:days_float) { 2.5 }
+      let(:days_string) { 'two' }
+
+      it 'fails if time is not a Time' do
+        expect{ Committed.add_buffer_to_time(nil, days_integer) }.to raise_error TypeError
+      end
+
+      it 'fails if buffer_in_days is not a Numeric (nil)' do
+        expect{ Committed.add_buffer_to_time(time, nil) }.to raise_error TypeError
+      end
+
+      it 'fails if buffer_in_days is not a Numeric (String)' do
+        expect{ Committed.add_buffer_to_time(time, days_string) }.to raise_error TypeError
+      end
+
+      it 'returns 2010-10-08T10:00:00+00:00 when buffer_in_days is 2' do
+        expect(Committed.add_buffer_to_time(time, days_integer)).to eq '2010-10-08T10:00:00+00:00'
+      end
+
+      it 'returns 2010-10-07T22:00:00+00:00 when buffer_in_days is 2.5' do
+        expect(Committed.add_buffer_to_time(time, days_float)).to eq '2010-10-07T22:00:00+00:00'
+      end
+    end
+
+
+
     describe 'get_issue_urls' do
       let(:issue_pattern) { '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]' }
       let(:postprocess) { [] }

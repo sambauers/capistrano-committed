@@ -82,7 +82,7 @@ module Capistrano
         expect{ Committed.get_revisions_from_lines(lines, nil, 'master', 10) }.to raise_error TypeError
       end
 
-      it 'fails if branch is not a String' do
+      it 'fails if branch is not a Symbol or a String' do
         expect{ Committed.get_revisions_from_lines(lines, search, nil, 10) }.to raise_error TypeError
       end
 

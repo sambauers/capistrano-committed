@@ -21,7 +21,7 @@ module Capistrano
                      line.is_a?(String)
         }
         check_type __callee__, 'search', search.is_a?(Regexp)
-        check_type __callee__, 'branch', branch.is_a?(String)
+        check_type __callee__, 'branch', (branch.is_a?(Symbol) || branch.is_a?(String))
         check_type __callee__, 'limit', limit.is_a?(Integer)
 
         revisions = {}

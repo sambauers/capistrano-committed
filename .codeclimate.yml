@@ -6,15 +6,20 @@ engines:
       - ruby
   fixme:
     enabled: true
-    exclude_fingerprints:
-    - 4e9778929cc70d7e78ca70e2d8f9c682
-    - 86689510a566f70822d4ae5319d845fa
-    - 1b442713191d345ee4ef24f270926bd5
   rubocop:
     enabled: true
 ratings:
   paths:
   - "**.rb"
   - "**.rake"
+  - "Rakefile"
 exclude_paths:
+- bin/**/*
+- icons/**/*
 - spec/**/*
+- ".gitignore"
+- ".rspec"
+- ".rubocop.yml"
+- ".travis.yml"
+- "LICENSE.md"
+- "README.md"

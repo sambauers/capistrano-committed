@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = "capistrano-committed"
   spec.version       = Capistrano::Committed::VERSION
   spec.authors       = ["Sam Bauers"]
-  spec.email         = ["sam@redant.com.au"]
+  spec.email         = ["sam@wopr.com.au"]
   spec.license       = 'MIT'
 
   spec.summary       = %q{Tells you what Capistrano 3 is going to deploy based on GitHub commits since the last release.}

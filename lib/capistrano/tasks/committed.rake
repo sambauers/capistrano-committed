@@ -88,17 +88,29 @@ namespace :committed do
     invoke 'committed:check_prerequisites'
     invoke 'committed:check_report_prerequisites'
 
+    ::Capistrano::Committed.import_settings({
+      branch:            fetch(:branch),
+      user:              fetch(:committed_user),
+      repo:              fetch(:committed_repo),
+      revision_line:     fetch(:committed_revision_line),
+      github_config:     fetch(:committed_github_config),
+      revision_limit:    fetch(:committed_revision_limit),
+      commit_buffer:     fetch(:committed_commit_buffer),
+      output_path:       fetch(:committed_output_path),
+      issue_match:       fetch(:committed_issue_match),
+      issue_postprocess: fetch(:committed_issue_postprocess),
+      issue_url:         fetch(:committed_issue_url),
+      deployments:       fetch(:committed_deployments),
+      deployment_id:     fetch(:committed_deployment_id)
+    })
+
     # Only do this on the primary web server
     on primary :web do
       # Get the Capistrano revision log
       lines = capture(:cat, revision_log).split("\n").reverse
 
-      # Build the regex to search for revision data in the log, by default this
-      # is the localised string from Capistrano
-      search = ::Capistrano::Committed.revision_search_regex(fetch(:committed_revision_line))
-
       # Build the revisions hash
-      revisions = ::Capistrano::Committed.get_revisions_from_lines(lines, search, fetch(:branch), fetch(:committed_revision_limit))
+      revisions = ::Capistrano::Committed.get_revisions_from_lines(lines)
 
       # No revisions, no log
       if revisions.empty?
@@ -112,7 +124,7 @@ namespace :committed do
       github = ::Capistrano::Committed::GithubApi.new(fetch(:committed_github_config))
 
       # Get the actual date of the commit referenced to by the revision
-      revisions = ::Capistrano::Committed.add_dates_to_revisions(revisions, github, fetch(:committed_user), fetch(:committed_repo))
+      revisions = ::Capistrano::Committed.add_dates_to_revisions(revisions, github)
 
       # Get the earliest revision date
       earliest_date = ::Capistrano::Committed.get_earliest_date_from_revisions(revisions)
@@ -126,7 +138,7 @@ namespace :committed do
       end
 
       # Go back an extra N days
-      earliest_date = ::Capistrano::Committed.add_buffer_to_time(earliest_date, fetch(:committed_commit_buffer))
+      earliest_date = ::Capistrano::Committed.add_buffer_to_time(earliest_date)
       revisions[:previous][:date] = earliest_date
 
       # Get all the commits on this branch
@@ -241,11 +253,7 @@ namespace :committed do
 
               # Get any issue numbers referred to in the commit info and print
               # links to them
-              urls = ::Capistrano::Committed.get_issue_urls(fetch(:committed_issue_match),
-                                                            fetch(:committed_issue_postprocess),
-                                                            fetch(:committed_issue_url),
-                                                            entry[:info][:title] + entry[:info][:body])
-              output += ::Capistrano::Committed.format_issue_urls(urls)
+              output += ::Capistrano::Committed.format_issue_urls(entry[:info][:title] + entry[:info][:body])
 
               # Merger details
               output << format('   %s',
@@ -265,11 +273,7 @@ namespace :committed do
                 entry[:commits].each do |commit|
                   output << ('    ' + ('-' * 90))
                   output << '   |'
-                  output += ::Capistrano::Committed.format_commit(commit,
-                                                                  '   |',
-                                                                  fetch(:committed_issue_match),
-                                                                  fetch(:committed_issue_postprocess),
-                                                                  fetch(:committed_issue_url))
+                  output += ::Capistrano::Committed.format_commit(commit, '   |')
                 end
                 output << ('    ' + ('-' * 90))
                 output << ''
@@ -278,11 +282,7 @@ namespace :committed do
             when :commit
               # These are commits that are included in this revision, but are
               # not in any pull requests
-              output += ::Capistrano::Committed.format_commit(entry[:info],
-                                                              '',
-                                                              fetch(:committed_issue_match),
-                                                              fetch(:committed_issue_postprocess),
-                                                              fetch(:committed_issue_url))
+              output += ::Capistrano::Committed.format_commit(entry[:info], '')
             end
 
             output << ('-' * 94)

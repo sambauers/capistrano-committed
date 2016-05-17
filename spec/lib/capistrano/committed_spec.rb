@@ -2,8 +2,58 @@ require 'spec_helper'
 
 module Capistrano
   describe Committed do
+    before(:each) do
+      Committed.import_settings({
+        branch:            :master,
+        user:              nil,
+        repo:              nil,
+        revision_line:     'Branch %{branch} (at %{sha}) deployed as release %{release} by %{user}',
+        github_config:     {},
+        revision_limit:    10,
+        commit_buffer:     1,
+        output_path:       '%s/public/committed.txt',
+        issue_match:       '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]',
+        issue_postprocess: [],
+        issue_url:         'https://example.jira.com/browse/%s',
+        deployments:       false,
+        deployment_id:     nil
+      })
+    end
+
     it 'has a version number' do
       expect(Committed::VERSION).not_to be nil
+    end
+
+    describe 'import_settings' do
+      let(:settings) { { foo: 'hello', bar: 1234 } }
+      let(:more_settings) { { baz: 'goodbye' } }
+      let(:final_settings) { { foo: 'hello', bar: 1234, baz: 'goodbye' } }
+
+      it 'imports the settings' do
+        expect(Committed.import_settings(settings)).to eq settings
+      end
+
+      it 'imports more settings' do
+        Committed.import_settings(settings)
+        expect(Committed.import_settings(more_settings, true)).to eq final_settings
+      end
+    end
+
+    describe 'get_settings' do
+      let(:branch) { 'foo' }
+      let(:branch_nil) { nil }
+
+      it 'returns default when variable is not set' do
+        expect(Committed.get_setting(:branch)).to eq :master
+      end
+
+      it 'returns default when variable is nil' do
+        expect(Committed.get_setting(:branch, branch_nil)).to eq :master
+      end
+
+      it 'returns "foo" when variable is set' do
+        expect(Committed.get_setting(:branch, branch)).to eq branch
+      end
     end
 
     describe 'revision_search_regex' do
@@ -11,7 +61,7 @@ module Capistrano
       let(:revision_line_escaped) { 'Branch\ (?<branch>.+)\ \(at\ (?<sha>.+)\)\ deployed\ as\ release\ (?<release>.+)\ by\ (?<user>.+)' }
 
       it 'fails if revision_line is not a String' do
-        expect{ Committed.revision_search_regex(nil) }.to raise_error TypeError
+        expect{ Committed.revision_search_regex(1234) }.to raise_error TypeError
       end
 
       it 'returns Regexp' do
@@ -20,6 +70,10 @@ module Capistrano
 
       it 'returns Regexp with escaped pattern' do
         expect(Committed.revision_search_regex(revision_line).source).to eq revision_line_escaped
+      end
+
+      it 'returns Regexp with escaped pattern using defaults' do
+        expect(Committed.revision_search_regex.source).to eq revision_line_escaped
       end
     end
 
@@ -79,19 +133,23 @@ module Capistrano
       end
 
       it 'fails if search is not a Regexp' do
-        expect{ Committed.get_revisions_from_lines(lines, nil, 'master', 10) }.to raise_error TypeError
+        expect{ Committed.get_revisions_from_lines(lines, 1234, 'master', 10) }.to raise_error TypeError
       end
 
       it 'fails if branch is not a Symbol or a String' do
-        expect{ Committed.get_revisions_from_lines(lines, search, nil, 10) }.to raise_error TypeError
+        expect{ Committed.get_revisions_from_lines(lines, search, 1234, 10) }.to raise_error TypeError
       end
 
       it 'fails if limit is not an Integer' do
-        expect{ Committed.get_revisions_from_lines(lines, search, 'master', nil) }.to raise_error TypeError
+        expect{ Committed.get_revisions_from_lines(lines, search, 'master', 'foo') }.to raise_error TypeError
       end
 
       it 'returns lines' do
         expect(Committed.get_revisions_from_lines(lines, search, 'master', 10)).to eq revisions
+      end
+
+      it 'returns lines using defaults' do
+        expect(Committed.get_revisions_from_lines(lines)).to eq revisions
       end
 
       it 'returns lines up to limit' do
@@ -186,18 +244,13 @@ module Capistrano
       let(:time) { Time.parse('2010-10-10 10:00:00 +0000') }
       let(:days_integer) { 2 }
       let(:days_float) { 2.5 }
-      let(:days_string) { 'two' }
 
       it 'fails if time is not a Time' do
         expect{ Committed.add_buffer_to_time(nil, days_integer) }.to raise_error TypeError
       end
 
-      it 'fails if buffer_in_days is not a Numeric (nil)' do
-        expect{ Committed.add_buffer_to_time(time, nil) }.to raise_error TypeError
-      end
-
       it 'fails if buffer_in_days is not a Numeric (String)' do
-        expect{ Committed.add_buffer_to_time(time, days_string) }.to raise_error TypeError
+        expect{ Committed.add_buffer_to_time(time, 'foo') }.to raise_error TypeError
       end
 
       it 'returns 2010-10-08T10:00:00+00:00 when buffer_in_days is 2' do
@@ -206,6 +259,10 @@ module Capistrano
 
       it 'returns 2010-10-07T22:00:00+00:00 when buffer_in_days is 2.5' do
         expect(Committed.add_buffer_to_time(time, days_float)).to eq '2010-10-07T22:00:00+00:00'
+      end
+
+      it 'returns 2010-10-09T10:00:00+00:00 using defaults' do
+        expect(Committed.add_buffer_to_time(time)).to eq '2010-10-09T10:00:00+00:00'
       end
     end
 
@@ -262,9 +319,9 @@ module Capistrano
                        committer: { login: 'awesomeuser' },
                        html_url: 'https://github.com/organisation/project/commit/d21e0721904acf31b1c2e5ac22655ae3a756fcb2' } }
       let(:pad) { '   |' }
-      let(:issue_pattern) { '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]' }
-      let(:postprocess) { [] }
-      let(:url_pattern) { 'https://example.jira.com/browse/%s' }
+      let(:issue_match) { '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]' }
+      let(:issue_postprocess) { [] }
+      let(:issue_url) { 'https://example.jira.com/browse/%s' }
       let(:commit_formatted) { [' * Commit d21e0721904acf31b1c2e5ac22655ae3a756fcb2',
                                 '',
                                 '   > Reporting [PROJECT-18983]',
@@ -293,28 +350,32 @@ module Capistrano
                                     '   |'] }
 
       it 'fails if commit is not a Hash' do
-        expect{ Committed.format_commit(nil, '', issue_pattern, postprocess, url_pattern) }.to raise_error TypeError
+        expect{ Committed.format_commit(nil, '', issue_match, issue_postprocess, issue_url) }.to raise_error TypeError
       end
 
       it 'fails if pad is not a String' do
-        expect{ Committed.format_commit(commit, nil, issue_pattern, postprocess, url_pattern) }.to raise_error TypeError
+        expect{ Committed.format_commit(commit, nil, issue_match, issue_postprocess, issue_url) }.to raise_error TypeError
       end
 
       it 'returns array of formatted text' do
-        expect(Committed.format_commit(commit, '', issue_pattern, postprocess, url_pattern)).to match_array commit_formatted
+        expect(Committed.format_commit(commit, '', issue_match, issue_postprocess, issue_url)).to match_array commit_formatted
+      end
+
+      it 'returns array of formatted text using defaults' do
+        expect(Committed.format_commit(commit)).to match_array commit_formatted
       end
 
       it 'returns array of formatted text with padding' do
-        expect(Committed.format_commit(commit, pad, issue_pattern, postprocess, url_pattern)).to match_array commit_formatted_pad
+        expect(Committed.format_commit(commit, pad, issue_match, issue_postprocess, issue_url)).to match_array commit_formatted_pad
       end
     end
 
     describe 'get_issue_urls' do
-      let(:issue_pattern) { '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]' }
-      let(:postprocess) { [] }
-      let(:postprocess_with_nil) { [:foo, :bar, nil] }
-      let(:postprocess_with_upcase) { [:upcase] }
-      let(:url_pattern) { 'https://example.jira.com/browse/%s' }
+      let(:issue_match) { '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]' }
+      let(:issue_postprocess) { [] }
+      let(:issue_postprocess_with_nil) { [:foo, :bar, nil] }
+      let(:issue_postprocess_with_upcase) { [:upcase] }
+      let(:issue_url) { 'https://example.jira.com/browse/%s' }
       let(:issueless_message) { 'Foo bar lulz' }
       let(:one_issue) { ['https://example.jira.com/browse/PROJECT-101'] }
       let(:one_issue_message) { 'Foo bar [PROJECT-101] lulz' }
@@ -327,58 +388,63 @@ module Capistrano
       let(:deduplicated_issue) { ['https://example.jira.com/browse/PROJECT-103'] }
       let(:deduplicated_issue_message) { 'Foo [PROJECT-103] bar [PROJECT-103] lah!' }
 
-      it 'fails if issue_pattern is not a String or Regexp' do
-        expect{ Committed.get_issue_urls(nil, postprocess, url_pattern, issueless_message) }.to raise_error TypeError
+      it 'fails if issue_match is not a String or Regexp' do
+        expect{ Committed.get_issue_urls(issueless_message, 1234, issue_postprocess, issue_url) }.to raise_error TypeError
       end
 
-      it 'fails if postprocess is not an Array' do
-        expect{ Committed.get_issue_urls(issue_pattern, nil, url_pattern, issueless_message) }.to raise_error TypeError
+      it 'fails if issue_postprocess is not an Array' do
+        expect{ Committed.get_issue_urls(issueless_message, issue_match, 1234, issue_url) }.to raise_error TypeError
       end
 
-      it 'fails if a postprocess item is not a Symbol' do
-        expect{ Committed.get_issue_urls(issue_pattern, postprocess_with_nil, url_pattern, issueless_message) }.to raise_error TypeError
+      it 'fails if a issue_postprocess item is not a Symbol' do
+        expect{ Committed.get_issue_urls(issueless_message, issue_match, issue_postprocess_with_nil, issue_url) }.to raise_error TypeError
       end
 
-      it 'fails if url_pattern is not a String' do
-        expect{ Committed.get_issue_urls(issue_pattern, postprocess, nil, issueless_message) }.to raise_error TypeError
+      it 'fails if issue_url is not a String' do
+        expect{ Committed.get_issue_urls(issueless_message, issue_match, issue_postprocess, 1234) }.to raise_error TypeError
       end
 
       it 'fails if message is not a String' do
-        expect{ Committed.get_issue_urls(issue_pattern, postprocess, url_pattern, nil) }.to raise_error TypeError
+        expect{ Committed.get_issue_urls(nil, issue_match, issue_postprocess, issue_url) }.to raise_error TypeError
       end
 
       it 'returns empty array if there are no issues' do
-        expect(Committed.get_issue_urls(issue_pattern, postprocess, url_pattern, issueless_message)).to match_array []
+        expect(Committed.get_issue_urls(issueless_message, issue_match, issue_postprocess, issue_url)).to match_array []
       end
 
       it 'returns array with one match if there is one issue' do
-        expect(Committed.get_issue_urls(issue_pattern, postprocess, url_pattern, one_issue_message)).to match_array one_issue
+        expect(Committed.get_issue_urls(one_issue_message, issue_match, issue_postprocess, issue_url)).to match_array one_issue
       end
 
-      it 'returns array with one match uppercased if there is one issue and postprocess is :upcase' do
-        expect(Committed.get_issue_urls(issue_pattern, postprocess_with_upcase, url_pattern, one_issue_message_lowercase)).to match_array one_issue
+      it 'returns array with one match uppercased if there is one issue and issue_postprocess is :upcase' do
+        expect(Committed.get_issue_urls(one_issue_message_lowercase, issue_match, issue_postprocess_with_upcase, issue_url)).to match_array one_issue
       end
 
       it 'returns array with two matches if there are two issues' do
-        expect(Committed.get_issue_urls(issue_pattern, postprocess, url_pattern, two_issues_message)).to match_array two_issues
+        expect(Committed.get_issue_urls(two_issues_message, issue_match, issue_postprocess, issue_url)).to match_array two_issues
+      end
+
+      it 'returns array with two matches if there are two issues using defaults' do
+        expect(Committed.get_issue_urls(two_issues_message)).to match_array two_issues
       end
 
       it 'returns array with two matches if there are two adjoining issues' do
-        expect(Committed.get_issue_urls(issue_pattern, postprocess, url_pattern, two_adjoining_issues_message)).to match_array two_issues
+        expect(Committed.get_issue_urls(two_adjoining_issues_message, issue_match, issue_postprocess, issue_url)).to match_array two_issues
       end
 
       it 'returns array with two matches if there are two issues over two lines' do
-        expect(Committed.get_issue_urls(issue_pattern, postprocess, url_pattern, two_issues_over_two_lines_message)).to match_array two_issues
+        expect(Committed.get_issue_urls(two_issues_over_two_lines_message, issue_match, issue_postprocess, issue_url)).to match_array two_issues
       end
 
       it 'returns array with one match if there are duplicate issues' do
-        expect(Committed.get_issue_urls(issue_pattern, postprocess, url_pattern, deduplicated_issue_message)).to match_array deduplicated_issue
+        expect(Committed.get_issue_urls(deduplicated_issue_message, issue_match, issue_postprocess, issue_url)).to match_array deduplicated_issue
       end
     end
 
     describe 'format_issue_urls' do
       it 'returns empty array if no urls' do
-        expect(Committed.format_issue_urls(nil)).to match_array []
+        expect{ Committed.format_issue_urls(nil) }.to raise_error TypeError
+        expect{ Committed.format_issue_urls(1234) }.to raise_error TypeError
         expect(Committed.format_issue_urls('')).to match_array []
         expect(Committed.format_issue_urls([])).to match_array []
       end

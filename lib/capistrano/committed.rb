@@ -109,17 +109,14 @@ module Capistrano
         # Print the commit ref
         output = [format('%s * %s',
                          pad,
-                         t('committed.output.commit_sha',
-                           sha: commit[:sha]))]
+                         t('committed.output.commit_sha', sha: commit[:sha]))]
         output << pad
 
         # Print the commit message
         lines = commit[:commit][:message].chomp.split("\n")
         unless lines.empty?
           lines.each do |line|
-            output << format('%s   > %s',
-                             pad,
-                             line)
+            output << format('%s   > %s', pad, line)
           end
           output << pad
 
@@ -135,12 +132,10 @@ module Capistrano
         # Committer details
         output << format('%s   %s',
                          pad,
-                         t('committed.output.committed_on',
-                           time: commit[:commit][:committer][:date]))
+                         t('committed.output.committed_on', time: commit[:commit][:committer][:date]))
         output << format('%s   %s',
                          pad,
-                         t('committed.output.committed_by',
-                           login: commit[:committer][:login]))
+                         t('committed.output.committed_by', login: commit[:committer][:login]))
         output << pad
 
         # Print a link to the commit in GitHub

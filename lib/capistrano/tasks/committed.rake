@@ -214,22 +214,8 @@ namespace :committed do
       output = []
       revisions.each do |release, revision|
         # Build the revision header
-        output << ''
-        output << ('=' * 94)
-        case release
-        when :next
-          output << t('committed.output.next_release')
-        when :previous
-          output << t('committed.output.previous_release',
-                      time: revision[:date])
-        else
-          output << t('committed.output.current_release',
-                      release_time: Time.parse(revision[:release]).iso8601,
-                      sha: revision[:sha],
-                      commit_time: revision[:date])
-        end
-        output << ('=' * 94)
-        output << ''
+        output += ::Capistrano::Committed.format_revision_header(release,
+                                                                 revision)
 
         # Loop through the entries in this revision
         items = Hash[revision[:entries].sort_by { |date, _entries| date }.reverse]
@@ -279,41 +265,11 @@ namespace :committed do
                 entry[:commits].each do |commit|
                   output << ('    ' + ('-' * 90))
                   output << '   |'
-
-                  # Print the commit ref
-                  output << format('   | * %s',
-                                   t('committed.output.commit_sha',
-                                     sha: commit[:sha]))
-                  output << '   |'
-
-                  # Print the commit message
-                  lines = commit[:commit][:message].chomp.split("\n")
-                  unless lines.empty?
-                    output << format('   |   > %s', lines.join("\n   |   > "))
-                    output << '   |'
-
-                    # Get any issue numbers referred to in the commit message
-                    # and print links to them
-                    urls = ::Capistrano::Committed.get_issue_urls(fetch(:committed_issue_match),
+                  output += ::Capistrano::Committed.format_commit(commit,
+                                                                  '   |',
+                                                                  fetch(:committed_issue_match),
                                                                   fetch(:committed_issue_postprocess),
-                                                                  fetch(:committed_issue_url),
-                                                                  commit[:commit][:message])
-                    output += ::Capistrano::Committed.format_issue_urls(urls,
-                                                                        '   |')
-                  end
-
-                  # Committer details
-                  output << format('   |   %s',
-                                   t('committed.output.committed_on',
-                                     time: commit[:commit][:committer][:date]))
-                  output << format('   |   %s',
-                                   t('committed.output.committed_by',
-                                     login: commit[:committer][:login]))
-                  output << '   |'
-
-                  # Print a link to the commit in GitHub
-                  output << format('   |   %s', commit[:html_url])
-                  output << '   |'
+                                                                  fetch(:committed_issue_url))
                 end
                 output << ('    ' + ('-' * 90))
                 output << ''
@@ -322,40 +278,11 @@ namespace :committed do
             when :commit
               # These are commits that are included in this revision, but are
               # not in any pull requests
-
-              # Print the commit ref
-              output << format(' * %s',
-                               t('committed.output.commit_sha',
-                                 sha: entry[:info][:sha]))
-              output << ''
-
-              # Print the commit message
-              lines = entry[:info][:commit][:message].chomp.split("\n")
-              unless lines.empty?
-                output << format('   > %s', lines.join("\n   > "))
-                output << ''
-
-                # Get any issue numbers referred to in the commit message and
-                # print links to them
-                urls = ::Capistrano::Committed.get_issue_urls(fetch(:committed_issue_match),
+              output += ::Capistrano::Committed.format_commit(entry[:info],
+                                                              '',
+                                                              fetch(:committed_issue_match),
                                                               fetch(:committed_issue_postprocess),
-                                                              fetch(:committed_issue_url),
-                                                              entry[:info][:commit][:message])
-                output += ::Capistrano::Committed.format_issue_urls(urls)
-              end
-
-              # Committer details
-              output << format('   %s',
-                               t('committed.output.committed_on',
-                                 time: entry[:info][:commit][:committer][:date]))
-              output << format('   %s',
-                               t('committed.output.committed_by',
-                                 login: entry[:info][:committer][:login]))
-              output << ''
-
-              # Print a link to the commit in GitHub
-              output << format('   %s', entry[:info][:html_url])
-              output << ''
+                                                              fetch(:committed_issue_url))
             end
 
             output << ('-' * 94)

@@ -79,6 +79,75 @@ module Capistrano
         (time - days_to_seconds(buffer_in_days)).iso8601
       end
 
+      def format_revision_header(release, revision)
+        check_type __callee__, 'release', (release.is_a?(Symbol) || release.is_a?(String))
+        check_type __callee__, 'revision', revision.is_a?(Hash)
+
+        output = ['']
+        output << ('=' * 94)
+        case release
+        when :next
+          output << t('committed.output.next_release')
+        when :previous
+          output << t('committed.output.previous_release',
+                      time: revision[:date])
+        else
+          output << t('committed.output.current_release',
+                      release_time: Time.parse(revision[:release]).iso8601,
+                      sha: revision[:sha],
+                      commit_time: revision[:date])
+        end
+        output << ('=' * 94)
+        output << ''
+      end
+
+      def format_commit(commit, pad, issue_pattern, postprocess, url_pattern)
+        check_type __callee__, 'commit', commit.is_a?(Hash)
+        check_type __callee__, 'pad', pad.is_a?(String)
+        # issue_pattern, postprocess, and url_pattern get type checked by `get_issue_urls`
+
+        # Print the commit ref
+        output = [format('%s * %s',
+                         pad,
+                         t('committed.output.commit_sha',
+                           sha: commit[:sha]))]
+        output << pad
+
+        # Print the commit message
+        lines = commit[:commit][:message].chomp.split("\n")
+        unless lines.empty?
+          lines.each do |line|
+            output << format('%s   > %s',
+                             pad,
+                             line)
+          end
+          output << pad
+
+          # Get any issue numbers referred to in the commit message
+          # and print links to them
+          urls = get_issue_urls(issue_pattern,
+                                postprocess,
+                                url_pattern,
+                                commit[:commit][:message])
+          output += format_issue_urls(urls, pad)
+        end
+
+        # Committer details
+        output << format('%s   %s',
+                         pad,
+                         t('committed.output.committed_on',
+                           time: commit[:commit][:committer][:date]))
+        output << format('%s   %s',
+                         pad,
+                         t('committed.output.committed_by',
+                           login: commit[:committer][:login]))
+        output << pad
+
+        # Print a link to the commit in GitHub
+        output << format('%s   %s', pad, commit[:html_url])
+        output << pad
+      end
+
       def get_issue_urls(issue_pattern, postprocess, url_pattern, message)
         check_type __callee__,
                    'issue_pattern',
@@ -96,13 +165,14 @@ module Capistrano
 
         matches = message.scan(Regexp.new(issue_pattern))
         return [] unless matches
-        matches.map { |match|
+        matches.map! { |match|
           issue = match[0]
           postprocess.each { |method|
             issue = issue.send(method)
           }
           format(url_pattern, issue)
         }
+        matches.uniq
       end
 
       def format_issue_urls(urls, pad = '')

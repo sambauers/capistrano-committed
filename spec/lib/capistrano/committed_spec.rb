@@ -209,7 +209,105 @@ module Capistrano
       end
     end
 
+    describe 'format_revision_header' do
+      let(:release_next) { :next }
+      let(:release_previous) { :previous }
+      let(:release_standard) { '20160119003754' }
+      let(:revision_next) { {} }
+      let(:revision_previous) { { date: '2016-04-26T04:37:22Z' } }
+      let(:revision_standard) { { release: '20160517053535',
+                                  sha: 'f881b9c',
+                                  date: '2016-05-17T05:19:05Z' } }
+      let(:header_next) { ['',
+                           '==============================================================================================',
+                           'Next release',
+                           '==============================================================================================',
+                           ''] }
+      let(:header_previous) { ['',
+                               '==============================================================================================',
+                               'Commits before 2016-04-26T04:37:22Z are omitted from the report   ¯\_(ツ)_/¯',
+                               '==============================================================================================',
+                               ''] }
+      let(:header_standard) { ['',
+                               '==============================================================================================',
+                               'Release on 2016-05-17T05:35:35+00:00 from commit f881b9c at 2016-05-17T05:19:05Z',
+                               '==============================================================================================',
+                               ''] }
 
+      it 'fails if release is not a Symbol or a String' do
+        expect{ Committed.format_revision_header(nil, revision_next) }.to raise_error TypeError
+      end
+
+      it 'fails if revision is not a Hash' do
+        expect{ Committed.format_revision_header(release_next, 'foo') }.to raise_error TypeError
+      end
+
+      it 'returns array of formatted text for next release' do
+        expect(Committed.format_revision_header(release_next, revision_next)).to match_array header_next
+      end
+
+      it 'returns array of formatted text for previous release' do
+        expect(Committed.format_revision_header(release_previous, revision_previous)).to match_array header_previous
+      end
+
+      it 'returns array of formatted text for standard release' do
+        expect(Committed.format_revision_header(release_standard, revision_standard)).to match_array header_standard
+      end
+    end
+
+    describe 'format_commit' do
+      let(:commit) { { sha: 'd21e0721904acf31b1c2e5ac22655ae3a756fcb2',
+                       commit: { message: "Reporting [PROJECT-18983]\nMaking it awesome!!!",
+                                 committer: { date: '2016-05-16T03:02:53Z' } },
+                       committer: { login: 'awesomeuser' },
+                       html_url: 'https://github.com/organisation/project/commit/d21e0721904acf31b1c2e5ac22655ae3a756fcb2' } }
+      let(:pad) { '   |' }
+      let(:issue_pattern) { '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]' }
+      let(:postprocess) { [] }
+      let(:url_pattern) { 'https://example.jira.com/browse/%s' }
+      let(:commit_formatted) { [' * Commit d21e0721904acf31b1c2e5ac22655ae3a756fcb2',
+                                '',
+                                '   > Reporting [PROJECT-18983]',
+                                '   > Making it awesome!!!',
+                                '',
+                                '   Issue links:',
+                                '   - https://example.jira.com/browse/PROJECT-18983',
+                                '',
+                                '   Committed on: 2016-05-16T03:02:53Z',
+                                '   Committed by: awesomeuser',
+                                '',
+                                '   https://github.com/organisation/project/commit/d21e0721904acf31b1c2e5ac22655ae3a756fcb2',
+                                ''] }
+      let(:commit_formatted_pad) { ['   | * Commit d21e0721904acf31b1c2e5ac22655ae3a756fcb2',
+                                    '   |',
+                                    '   |   > Reporting [PROJECT-18983]',
+                                    '   |   > Making it awesome!!!',
+                                    '   |',
+                                    '   |   Issue links:',
+                                    '   |   - https://example.jira.com/browse/PROJECT-18983',
+                                    '   |',
+                                    '   |   Committed on: 2016-05-16T03:02:53Z',
+                                    '   |   Committed by: awesomeuser',
+                                    '   |',
+                                    '   |   https://github.com/organisation/project/commit/d21e0721904acf31b1c2e5ac22655ae3a756fcb2',
+                                    '   |'] }
+
+      it 'fails if commit is not a Hash' do
+        expect{ Committed.format_commit(nil, '', issue_pattern, postprocess, url_pattern) }.to raise_error TypeError
+      end
+
+      it 'fails if pad is not a String' do
+        expect{ Committed.format_commit(commit, nil, issue_pattern, postprocess, url_pattern) }.to raise_error TypeError
+      end
+
+      it 'returns array of formatted text' do
+        expect(Committed.format_commit(commit, '', issue_pattern, postprocess, url_pattern)).to match_array commit_formatted
+      end
+
+      it 'returns array of formatted text with padding' do
+        expect(Committed.format_commit(commit, pad, issue_pattern, postprocess, url_pattern)).to match_array commit_formatted_pad
+      end
+    end
 
     describe 'get_issue_urls' do
       let(:issue_pattern) { '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]' }
@@ -226,6 +324,8 @@ module Capistrano
       let(:two_issues_message) { 'Foo bar [PROJECT-101] [PROJECT-102] lulz' }
       let(:two_adjoining_issues_message) { 'Foo bar [PROJECT-101][PROJECT-102] lulz' }
       let(:two_issues_over_two_lines_message) { "Foo bar [PROJECT-101] lulz\n[PROJECT-102] also" }
+      let(:deduplicated_issue) { ['https://example.jira.com/browse/PROJECT-103'] }
+      let(:deduplicated_issue_message) { 'Foo [PROJECT-103] bar [PROJECT-103] lah!' }
 
       it 'fails if issue_pattern is not a String or Regexp' do
         expect{ Committed.get_issue_urls(nil, postprocess, url_pattern, issueless_message) }.to raise_error TypeError
@@ -269,6 +369,10 @@ module Capistrano
 
       it 'returns array with two matches if there are two issues over two lines' do
         expect(Committed.get_issue_urls(issue_pattern, postprocess, url_pattern, two_issues_over_two_lines_message)).to match_array two_issues
+      end
+
+      it 'returns array with one match if there are duplicate issues' do
+        expect(Committed.get_issue_urls(issue_pattern, postprocess, url_pattern, deduplicated_issue_message)).to match_array deduplicated_issue
       end
     end
 

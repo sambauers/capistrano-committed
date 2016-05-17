@@ -20,3 +20,5 @@ def t(key, options={})
 end
 
 require 'capistrano/committed'
+
+ENV['TZ'] = 'UTC'

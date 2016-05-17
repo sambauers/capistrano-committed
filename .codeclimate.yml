@@ -7,9 +7,9 @@ engines:
   fixme:
     enabled: true
     exclude_fingerprints:
-    - ee0a31701f95b21db4aff40647a56a3d
-    - b86af833d6b2b1fa18da63471e2278d9
-    - cdc1cac1f5cb7afe72dca9f9bca8a237
+    - 4e9778929cc70d7e78ca70e2d8f9c682
+    - 86689510a566f70822d4ae5319d845fa
+    - 1b442713191d345ee4ef24f270926bd5
   rubocop:
     enabled: true
 ratings:

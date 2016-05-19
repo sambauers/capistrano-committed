@@ -1,0 +1,63 @@
+{{page_title}}
+{{#revisions}}
+
+==============================================================================================
+{{release_header}}
+==============================================================================================
+  {{#items}}
+
+ * {{item_title}}
+    {{#has_item_subtitle}}
+   {{item_subtitle}}
+    {{/has_item_subtitle}}
+    {{#has_item_lines}}
+
+      {{#item_lines}}
+   > {{.}}
+      {{/item_lines}}
+      {{#has_issue_links}}
+
+   Issue links:
+        {{#issue_links}}
+   - {{{issue_link}}}
+        {{/issue_links}}
+      {{/has_issue_links}}
+    {{/has_item_lines}}
+
+   {{item_created_on}}
+   {{item_created_by}}
+
+   {{{item_link}}}
+
+    {{#has_commits}}
+      {{#commits}}
+    ------------------------------------------------------------------------------------------
+   |
+   | * {{item_title}}
+        {{#has_item_lines}}
+   |
+          {{#item_lines}}
+   |   > {{.}}
+          {{/item_lines}}
+          {{#has_issue_links}}
+   |
+   |   Issue links:
+            {{#issue_links}}
+   |   - {{{issue_link}}}
+            {{/issue_links}}
+          {{/has_issue_links}}
+        {{/has_item_lines}}
+   |
+   |   {{item_created_on}}
+   |   {{item_created_by}}
+   |
+   |   {{{item_link}}}
+   |
+      {{/commits}}
+    ------------------------------------------------------------------------------------------
+
+    {{/has_commits}}
+----------------------------------------------------------------------------------------------
+  {{/items}}
+
+{{/revisions}}

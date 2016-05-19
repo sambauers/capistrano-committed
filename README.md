@@ -93,9 +93,14 @@ set :committed_revision_limit, 10
 # How many days beyond the last revision we fetch should we look for commits
 set :committed_commit_buffer, 1
 
-# Where to upload the report - '%s' is replaced with `current_path` if present.
-# `nil` will stop the report from uploading at all, and print to STDOUT instead.
-set :committed_output_path, '%s/public/committed.txt'
+# Where to upload the text report - '%s' is replaced with `current_path` if
+# present. `nil` will stop the report from uploading at all, and print to STDOUT
+# instead.
+set :committed_output_text_path, '%s/public/committed.txt'
+
+# Where to upload the html report - '%s' is replaced with `current_path` if
+# present. `nil` will stop the report from uploading at all.
+set :committed_output_html_path, '%s/public/committed.html'
 
 # This is a regexp pattern that describes issue numbers in commit titles and
 # descriptions. This example matches JIRA numbers enclosed in square braces -

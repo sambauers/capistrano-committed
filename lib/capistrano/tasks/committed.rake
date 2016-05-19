@@ -33,10 +33,20 @@ namespace :committed do
                       variable: 'committed_commit_buffer') unless
                         fetch(:committed_commit_buffer).is_a?(Integer)
 
+    fail TypeError, t('committed.error.deprecated',
+                      deprecated: 'committed_output_path',
+                      replacement: 'committed_output_text_path') if
+                        fetch(:committed_output_path).is_a?(String)
+
     fail TypeError, t('committed.error.prerequisites.string_or_nil',
-                      variable: 'committed_output_path') unless
-                        fetch(:committed_output_path).is_a?(String) ||
-                        fetch(:committed_output_path).nil?
+                      variable: 'committed_output_text_path') unless
+                        fetch(:committed_output_text_path).is_a?(String) ||
+                        fetch(:committed_output_text_path).nil?
+
+    fail TypeError, t('committed.error.prerequisites.string_or_nil',
+                      variable: 'committed_output_html_path') unless
+                        fetch(:committed_output_html_path).is_a?(String) ||
+                        fetch(:committed_output_html_path).nil?
 
     fail TypeError, t('committed.error.prerequisites.string_or_regexp_or_nil',
                       variable: 'committed_issue_match') unless
@@ -96,7 +106,8 @@ namespace :committed do
       github_config:     fetch(:committed_github_config),
       revision_limit:    fetch(:committed_revision_limit),
       commit_buffer:     fetch(:committed_commit_buffer),
-      output_path:       fetch(:committed_output_path),
+      output_text_path:  fetch(:committed_output_text_path),
+      output_html_path:  fetch(:committed_output_html_path),
       issue_match:       fetch(:committed_issue_match),
       issue_postprocess: fetch(:committed_issue_postprocess),
       issue_url:         fetch(:committed_issue_url),
@@ -187,10 +198,17 @@ namespace :committed do
 
         # Push pull request data in to the revision entries hash
         key = revisions.keys[revision_index]
+        sub_commits = []
+        pull_request[:commits].each do |c|
+          sub_commits << {
+            type: :commit,
+            info: c
+          }
+        end
         revisions[key][:entries][pull_request[:info][:merged_at]] = [{
           type:     :pull_request,
           info:     pull_request[:info],
-          commits:  pull_request[:commits]
+          commits:  sub_commits
         }]
 
         # Delete commits which are in this pull request from the hash of commits
@@ -222,88 +240,38 @@ namespace :committed do
         }
       end
 
-      # Loop through the revisions to create the output
-      output = []
-      revisions.each do |release, revision|
-        # Build the revision header
-        output += ::Capistrano::Committed.format_revision_header(release,
-                                                                 revision)
+      # Send the text output to screen, or to a file on the server
 
-        # Loop through the entries in this revision
-        items = Hash[revision[:entries].sort_by { |date, _entries| date }.reverse]
-        items.each do |_date, entries|
-          entries.each do |entry|
-            case entry[:type]
-            when :pull_request
-              # These are pull requests that are included in this revision
+      # Create the mustache instance and plug in the revisions
+      output = ::Capistrano::Committed::Output.new()
+      output[:revisions] = revisions.values
+      output[:page_title] = t('committed.output.page_title',
+                              repo: format('%s/%s', fetch(:committed_user), fetch(:committed_repo)))
 
-              # Print out the pull request number and title
-              output << format(' * %s',
-                               t('committed.output.pull_request_number',
-                                 number: entry[:info][:number]))
-              output << format('   %s', entry[:info][:title])
-              output << ''
-
-              # Print out each line of the pull request description
-              lines = entry[:info][:body].chomp.split("\n")
-              unless lines.empty?
-                output << format('   %s', lines.join("\n   "))
-                output << ''
-              end
-
-              # Get any issue numbers referred to in the commit info and print
-              # links to them
-              output += ::Capistrano::Committed.format_issue_urls(entry[:info][:title] + entry[:info][:body])
-
-              # Merger details
-              output << format('   %s',
-                               t('committed.output.merged_on',
-                                 time: entry[:info][:merged_at]))
-              output << format('   %s',
-                               t('committed.output.merged_by',
-                                 login: entry[:info][:merged_by][:login]))
-              output << ''
-
-              # Print a link to the pull request on GitHub
-              output << format('   %s', entry[:info][:html_url])
-              output << ''
-
-              # Loop through the commits in this pull request
-              unless entry[:commits].nil?
-                entry[:commits].each do |commit|
-                  output << ('    ' + ('-' * 90))
-                  output << '   |'
-                  output += ::Capistrano::Committed.format_commit(commit, '   |')
-                end
-                output << ('    ' + ('-' * 90))
-                output << ''
-              end
-
-            when :commit
-              # These are commits that are included in this revision, but are
-              # not in any pull requests
-              output += ::Capistrano::Committed.format_commit(entry[:info], '')
-            end
-
-            output << ('-' * 94)
-            output << ''
-          end
-        end
-
-        output << ''
-      end
-
-      # Send the output to screen, or to a file on the server
-      if fetch(:committed_output_path).nil?
+      # Send the text output to a file on the server
+      if fetch(:committed_output_text_path).nil?
         # Just print to STDOUT
-        puts output
+        puts output.render
       else
         # Determine the output path and upload the output there
-        output_path = format(fetch(:committed_output_path), current_path)
-        upload! StringIO.new(output.join("\n")), output_path
+        output_text_path = format(fetch(:committed_output_text_path), current_path)
+        upload! StringIO.new(output.render), output_text_path
 
         # Make sure the report is world readable
-        execute(:chmod, 'a+r', output_path)
+        execute(:chmod, 'a+r', output_text_path)
+      end
+
+      # Send the html output to a file on the server
+      unless fetch(:committed_output_html_path).nil?
+        # Switch to the HTML template
+        output.template_file = output.get_output_template_path('html')
+
+        # Determine the output path and upload the output there
+        output_html_path = format(fetch(:committed_output_html_path), current_path)
+        upload! StringIO.new(output.render), output_html_path
+
+        # Make sure the report is world readable
+        execute(:chmod, 'a+r', output_html_path)
       end
     end
   end
@@ -319,7 +287,8 @@ namespace :load do
     set :committed_github_config,     -> { {} }
     set :committed_revision_limit,    -> { 10 }
     set :committed_commit_buffer,     -> { 1 }
-    set :committed_output_path,       -> { '%s/public/committed.txt' }
+    set :committed_output_text_path,  -> { '%s/public/committed.txt' }
+    set :committed_output_html_path,  -> { '%s/public/committed.html' }
     set :committed_issue_match,       -> { '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]' }
     set :committed_issue_postprocess, -> { [] }
     set :committed_issue_url,         -> { 'https://example.jira.com/browse/%s' }

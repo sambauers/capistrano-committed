@@ -84,29 +84,29 @@ module Capistrano
                      'Branch master (at e5535c4) deployed as release 20160113003755 by mike',
                      'Branch master (at 3b3e45d) deployed as release 20160106034830 by sam'] }
       let(:search) { Committed.revision_search_regex('Branch %{branch} (at %{sha}) deployed as release %{release} by %{user}') }
-      let(:revisions) { { next: { entries: {} },
+      let(:revisions) { { next: { release: :next, entries: {} },
                           '20160119003754' => { branch: 'master', sha: '08e0390', release: '20160119003754', user: 'jim', entries: {} },
                           '20160119002603' => { branch: 'master', sha: '08e0390', release: '20160119002603', user: 'daniel', entries: {} },
                           '20160118044318' => { branch: 'master', sha: '66fcf81', release: '20160118044318', user: 'daniel', entries: {} },
                           '20160113003755' => { branch: 'master', sha: 'e5535c4', release: '20160113003755', user: 'mike', entries: {} },
                           '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {} },
-                          previous: { entries: {} }
+                          previous: { release: :previous, entries: {} }
       } }
-      let(:revisions_to_limit) { { next: { entries: {} },
+      let(:revisions_to_limit) { { next: { release: :next, entries: {} },
                           '20160119003754' => { branch: 'master', sha: '08e0390', release: '20160119003754', user: 'jim', entries: {} },
                           '20160119002603' => { branch: 'master', sha: '08e0390', release: '20160119002603', user: 'daniel', entries: {} },
-                          previous: { entries: {} }
+                          previous: { release: :previous, entries: {} }
       } }
       let(:lines_with_branches) { ['Branch master (at 08e0390) deployed as release 20160119003754 by jim',
                                    'Branch other (at 08e0390) deployed as release 20160119002603 by daniel',
                                    'Branch other (at 66fcf81) deployed as release 20160118044318 by daniel',
                                    'Branch master (at e5535c4) deployed as release 20160113003755 by mike',
                                    'Branch master (at 3b3e45d) deployed as release 20160106034830 by sam'] }
-      let(:revisions_in_branch) { { next: { entries: {} },
+      let(:revisions_in_branch) { { next: { release: :next, entries: {} },
                           '20160119003754' => { branch: 'master', sha: '08e0390', release: '20160119003754', user: 'jim', entries: {} },
                           '20160113003755' => { branch: 'master', sha: 'e5535c4', release: '20160113003755', user: 'mike', entries: {} },
                           '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {} },
-                          previous: { entries: {} }
+                          previous: { release: :previous, entries: {} }
       } }
       let(:lines_with_rollback) { [
                                    'Branch master (at 5a4f743) deployed as release 20160121001342 by cathy',
@@ -115,13 +115,13 @@ module Capistrano
                                    'Branch master (at 08e0390) deployed as release 20160119002603 by daniel',
                                    'Branch master (at e5535c4) deployed as release 20160113003755 by mike',
                                    'Branch master (at 3b3e45d) deployed as release 20160106034830 by sam'] }
-      let(:revisions_with_rollback) { { next: { entries: {} },
+      let(:revisions_with_rollback) { { next: { release: :next, entries: {} },
                                         '20160121001342' => { branch: 'master', sha: '5a4f743', release: '20160121001342', user: 'cathy', entries: {} },
                                         '20160119003754' => { branch: 'master', sha: '66fcf81', release: '20160119003754', user: 'jim', entries: {} },
                                         '20160119002603' => { branch: 'master', sha: '08e0390', release: '20160119002603', user: 'daniel', entries: {} },
                                         '20160113003755' => { branch: 'master', sha: 'e5535c4', release: '20160113003755', user: 'mike', entries: {} },
                                         '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {} },
-                                        previous: { entries: {} }
+                                        previous: { release: :previous, entries: {} }
       } }
 
       it 'fails if lines is not an Array' do
@@ -166,13 +166,13 @@ module Capistrano
     end
 
     describe 'add_dates_to_revisions' do
-      let(:revisions) { { next: { entries: {} },
+      let(:revisions) { { next: { release: :next, entries: {} },
                           '20160119003754' => { branch: 'master', sha: '08e0390', release: '20160119003754', user: 'jim', entries: {} },
                           '20160119002603' => { branch: 'master', sha: '08e0390', release: '20160119002603', user: 'daniel', entries: {} },
                           '20160118044318' => { branch: 'master', sha: '66fcf81', release: '20160118044318', user: 'daniel', entries: {} },
                           '20160113003755' => { branch: 'master', sha: 'e5535c4', release: '20160113003755', user: 'mike', entries: {} },
                           '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {} },
-                          previous: { entries: {} }
+                          previous: { release: :previous, entries: {} }
       } }
       let(:github) { Committed::GithubApi.new() }
       let(:git_user) { 'username' }
@@ -196,13 +196,13 @@ module Capistrano
     end
 
     describe 'get_earliest_date_from_revisions' do
-      let(:revisions) { { next: { entries: {} },
+      let(:revisions) { { next: { release: :next, entries: {} },
                           '20160119003754' => { branch: 'master', sha: '08e0390', release: '20160119003754', user: 'jim', entries: {}, date: '2015-08-11T05:00:00+11:00' },
                           '20160119002603' => { branch: 'master', sha: '08e0390', release: '20160119002603', user: 'daniel', entries: {}, date: '2015-08-11T04:00:00+11:00' },
                           '20160118044318' => { branch: 'master', sha: '66fcf81', release: '20160118044318', user: 'daniel', entries: {}, date: '2015-08-11T03:00:00+11:00' },
                           '20160113003755' => { branch: 'master', sha: 'e5535c4', release: '20160113003755', user: 'mike', entries: {}, date: '2015-08-11T02:00:00+11:00' },
                           '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {}, date: '2015-08-11T01:00:00+11:00' },
-                          previous: { entries: {} }
+                          previous: { release: :previous, entries: {} }
       } }
 
       it 'fails if revisions is not a Hash' do
@@ -263,110 +263,6 @@ module Capistrano
 
       it 'returns 2010-10-09T10:00:00+00:00 using defaults' do
         expect(Committed.add_buffer_to_time(time)).to eq '2010-10-09T10:00:00+00:00'
-      end
-    end
-
-    describe 'format_revision_header' do
-      let(:release_next) { :next }
-      let(:release_previous) { :previous }
-      let(:release_standard) { '20160119003754' }
-      let(:revision_next) { {} }
-      let(:revision_previous) { { date: '2016-04-26T04:37:22Z' } }
-      let(:revision_standard) { { release: '20160517053535',
-                                  sha: 'f881b9c',
-                                  date: '2016-05-17T05:19:05Z' } }
-      let(:header_next) { ['',
-                           '==============================================================================================',
-                           'Next release',
-                           '==============================================================================================',
-                           ''] }
-      let(:header_previous) { ['',
-                               '==============================================================================================',
-                               'Commits before 2016-04-26T04:37:22Z are omitted from the report   ¯\_(ツ)_/¯',
-                               '==============================================================================================',
-                               ''] }
-      let(:header_standard) { ['',
-                               '==============================================================================================',
-                               'Release on 2016-05-17T05:35:35+00:00 from commit f881b9c at 2016-05-17T05:19:05Z',
-                               '==============================================================================================',
-                               ''] }
-
-      it 'fails if release is not a Symbol or a String' do
-        expect{ Committed.format_revision_header(nil, revision_next) }.to raise_error TypeError
-      end
-
-      it 'fails if revision is not a Hash' do
-        expect{ Committed.format_revision_header(release_next, 'foo') }.to raise_error TypeError
-      end
-
-      it 'returns array of formatted text for next release' do
-        expect(Committed.format_revision_header(release_next, revision_next)).to match_array header_next
-      end
-
-      it 'returns array of formatted text for previous release' do
-        expect(Committed.format_revision_header(release_previous, revision_previous)).to match_array header_previous
-      end
-
-      it 'returns array of formatted text for standard release' do
-        expect(Committed.format_revision_header(release_standard, revision_standard)).to match_array header_standard
-      end
-    end
-
-    describe 'format_commit' do
-      let(:commit) { { sha: 'd21e0721904acf31b1c2e5ac22655ae3a756fcb2',
-                       commit: { message: "Reporting [PROJECT-18983]\nMaking it awesome!!!",
-                                 committer: { date: '2016-05-16T03:02:53Z' } },
-                       committer: { login: 'awesomeuser' },
-                       html_url: 'https://github.com/organisation/project/commit/d21e0721904acf31b1c2e5ac22655ae3a756fcb2' } }
-      let(:pad) { '   |' }
-      let(:issue_match) { '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]' }
-      let(:issue_postprocess) { [] }
-      let(:issue_url) { 'https://example.jira.com/browse/%s' }
-      let(:commit_formatted) { [' * Commit d21e0721904acf31b1c2e5ac22655ae3a756fcb2',
-                                '',
-                                '   > Reporting [PROJECT-18983]',
-                                '   > Making it awesome!!!',
-                                '',
-                                '   Issue links:',
-                                '   - https://example.jira.com/browse/PROJECT-18983',
-                                '',
-                                '   Committed on: 2016-05-16T03:02:53Z',
-                                '   Committed by: awesomeuser',
-                                '',
-                                '   https://github.com/organisation/project/commit/d21e0721904acf31b1c2e5ac22655ae3a756fcb2',
-                                ''] }
-      let(:commit_formatted_pad) { ['   | * Commit d21e0721904acf31b1c2e5ac22655ae3a756fcb2',
-                                    '   |',
-                                    '   |   > Reporting [PROJECT-18983]',
-                                    '   |   > Making it awesome!!!',
-                                    '   |',
-                                    '   |   Issue links:',
-                                    '   |   - https://example.jira.com/browse/PROJECT-18983',
-                                    '   |',
-                                    '   |   Committed on: 2016-05-16T03:02:53Z',
-                                    '   |   Committed by: awesomeuser',
-                                    '   |',
-                                    '   |   https://github.com/organisation/project/commit/d21e0721904acf31b1c2e5ac22655ae3a756fcb2',
-                                    '   |'] }
-
-      it 'fails if commit is not a Hash' do
-        expect{ Committed.format_commit(nil, '', issue_match, issue_postprocess, issue_url) }.to raise_error TypeError
-      end
-
-      it 'fails if pad is not a String' do
-        expect{ Committed.format_commit(commit, nil, issue_match, issue_postprocess, issue_url) }.to raise_error TypeError
-      end
-
-      it 'returns array of formatted text' do
-        expect(Committed.format_commit(commit, '', issue_match, issue_postprocess, issue_url)).to match_array commit_formatted
-      end
-
-      it 'returns array of formatted text using defaults' do
-        expect(Committed.format_commit(commit)).to match_array commit_formatted
-      end
-
-      it 'returns array of formatted text with padding' do
-        expect(Committed.format_commit(commit, pad, issue_match, issue_postprocess, issue_url)).to match_array commit_formatted_pad
       end
     end
 
@@ -438,38 +334,6 @@ module Capistrano
 
       it 'returns array with one match if there are duplicate issues' do
         expect(Committed.get_issue_urls(deduplicated_issue_message, issue_match, issue_postprocess, issue_url)).to match_array deduplicated_issue
-      end
-    end
-
-    describe 'format_issue_urls' do
-      it 'returns empty array if no urls' do
-        expect{ Committed.format_issue_urls(nil) }.to raise_error TypeError
-        expect{ Committed.format_issue_urls(1234) }.to raise_error TypeError
-        expect(Committed.format_issue_urls('')).to match_array []
-        expect(Committed.format_issue_urls([])).to match_array []
-      end
-
-      let(:urls) { ['https://example.jira.com/browse/PROJECT-123',
-                    'https://example.jira.com/browse/PROJECT-124',
-                    'https://example.jira.com/browse/PROJECT-128'] }
-      let(:output) { [format('   %s', t('committed.output.issue_links')),
-                      '   - https://example.jira.com/browse/PROJECT-123',
-                      '   - https://example.jira.com/browse/PROJECT-124',
-                      '   - https://example.jira.com/browse/PROJECT-128',
-                      ''] }
-      let(:pad) { '   |' }
-      let(:padded_output) { [format('   |   %s', t('committed.output.issue_links')),
-                             '   |   - https://example.jira.com/browse/PROJECT-123',
-                             '   |   - https://example.jira.com/browse/PROJECT-124',
-                             '   |   - https://example.jira.com/browse/PROJECT-128',
-                             '   |'] }
-
-      it 'returns array of formatted text' do
-        expect(Committed.format_issue_urls(urls)).to match_array output
-      end
-
-      it 'returns array of formatted text with padding' do
-        expect(Committed.format_issue_urls(urls, pad)).to match_array padded_output
       end
     end
   end

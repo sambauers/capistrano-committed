@@ -1,6 +1,7 @@
 require 'capistrano/committed/version'
 require 'capistrano/committed/i18n'
 require 'capistrano/committed/github_api'
+require 'capistrano/committed/output'
 
 module Capistrano
   module Committed
@@ -102,70 +103,6 @@ module Capistrano
         (time - days_to_seconds(buffer_in_days)).iso8601
       end
 
-      def format_revision_header(release, revision)
-        check_type __callee__, 'release', (release.is_a?(Symbol) || release.is_a?(String))
-        check_type __callee__, 'revision', revision.is_a?(Hash)
-
-        output = ['']
-        output << ('=' * 94)
-        case release
-        when :next
-          output << t('committed.output.next_release')
-        when :previous
-          output << t('committed.output.previous_release',
-                      time: revision[:date])
-        else
-          output << t('committed.output.current_release',
-                      release_time: Time.parse(revision[:release]).iso8601,
-                      sha: revision[:sha],
-                      commit_time: revision[:date])
-        end
-        output << ('=' * 94)
-        output << ''
-      end
-
-      def format_commit(commit, pad = '', issue_match = nil, issue_postprocess = nil, issue_url = nil)
-        check_type __callee__, 'commit', commit.is_a?(Hash)
-        check_type __callee__, 'pad', pad.is_a?(String)
-        # issue_match, issue_postprocess, and issue_url get type checked by `get_issue_urls`
-
-        # Print the commit ref
-        output = [format('%s * %s',
-                         pad,
-                         t('committed.output.commit_sha', sha: commit[:sha]))]
-        output << pad
-
-        # Print the commit message
-        lines = commit[:commit][:message].chomp.split("\n")
-        unless lines.empty?
-          lines.each do |line|
-            output << format('%s   > %s', pad, line)
-          end
-          output << pad
-
-          # Get any issue numbers referred to in the commit message
-          # and print links to them
-          urls = get_issue_urls(commit[:commit][:message],
-                                issue_match,
-                                issue_postprocess,
-                                issue_url)
-          output += format_issue_urls(urls, pad)
-        end
-
-        # Committer details
-        output << format('%s   %s',
-                         pad,
-                         t('committed.output.committed_on', time: commit[:commit][:committer][:date]))
-        output << format('%s   %s',
-                         pad,
-                         t('committed.output.committed_by', login: commit[:committer][:login]))
-        output << pad
-
-        # Print a link to the commit in GitHub
-        output << format('%s   %s', pad, commit[:html_url])
-        output << pad
-      end
-
       def get_issue_urls(message, issue_match = nil, issue_postprocess = nil, issue_url = nil)
         check_type __callee__, 'message', message.is_a?(String)
 
@@ -197,17 +134,6 @@ module Capistrano
         matches.uniq
       end
 
-      def format_issue_urls(urls, pad = '')
-        urls = get_issue_urls(urls) unless urls.is_a?(Array)
-        return [] if urls.nil? || urls.empty?
-        output = []
-        output << format('%s   %s', pad, t('committed.output.issue_links'))
-        urls.each do |url|
-          output << format('%s   - %s', pad, url)
-        end
-        output << format('%s', pad)
-      end
-
     private
       def check_type(method, param, condition)
         fail TypeError, t('committed.error.helpers.valid_param',
@@ -222,9 +148,9 @@ module Capistrano
           # Sort revisions by release date
           revisions = Hash[revisions.sort { |a, b| b[1][:release] <=> a[1][:release] }]
           # Add the "previous" revision
-          revisions.merge!(previous: { entries: {} })
+          revisions.merge!(previous: { release: :previous, entries: {} })
           # Add the "next" revision
-          revisions = {next: { entries: {} }}.merge(revisions)
+          revisions = {next: { release: :next, entries: {} }}.merge(revisions)
         end
         revisions
       end

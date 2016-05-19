@@ -16,6 +16,7 @@ en = {
       string_or_nil:            '`:%{variable}` variable is not a string or `nil`.',
       string_or_regexp_or_nil:  '`:%{variable}` variable is not a string or `Regexp` object or `nil`.'
     },
+    deprecated: '`%{deprecated}` variable is deprecated. Use `%{replacement}` instead.',
     runtime: {
       revisions_empty:          'The %{branch} branch has never been deployed to the %{stage} stage. No log has been generated.',
       revision_commit_missing:  'No commit data has been found for the %{branch} branch on the %{stage} stage. No log has been generated.',
@@ -23,6 +24,7 @@ en = {
     }
   },
   output: {
+    page_title:           'Git Deployment Report for %{repo}',
     next_release:         'Next release',
     previous_release:     'Commits before %{time} are omitted from the report   ¯\_(ツ)_/¯',
     current_release:      'Release on %{release_time} from commit %{sha} at %{commit_time}',

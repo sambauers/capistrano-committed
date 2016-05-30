@@ -6,14 +6,16 @@ module Capistrano
       let(:object) { described_class }
       subject(:github_api) { object.new }
 
-      let(:user)   { 'user' }
-      let(:repo)   { 'repo' }
-      let(:number) { 1 }
-      let(:sha)    { '1234567890abcdef' }
-      let(:date)   { '2015-08-10T08:00:00Z' }
-      let(:stage)  { 'production' }
-      let(:status) { 'pending' }
-      let(:method) { 'is_rspec_test?' }
+      let(:user)      { 'octocat' }
+      let(:repo)      { 'Hello-World' }
+      let(:number)    { 1 }
+      let(:sha)       { '7638417db6d59f3c' }
+      let(:sha_full)  { '7638417db6d59f3c431d3e1f261cc637155684cd' }
+      let(:author)    { 'Scott Chacon' }
+      let(:date)      { '2015-08-10T08:00:00Z' }
+      let(:stage)     { 'production' }
+      let(:status)    { 'pending' }
+      let(:method)    { 'is_rspec_test?' }
 
       describe 'initialize' do
         it 'fails if config_options is not a Hash' do
@@ -68,7 +70,10 @@ module Capistrano
         end
 
         it 'should return a commit' do
-          expect(subject.get_commit(user, repo, sha)).to be_a Github::ResponseWrapper
+          commit = subject.get_commit(user, repo, sha)
+          expect(commit).to be_a Github::ResponseWrapper
+          expect(commit.sha).to eq sha_full
+          expect(commit.author.name).to eq author
         end
       end
 

@@ -17,6 +17,10 @@ module Capistrano
         get_output_path(format('output_%s.mustache', format))
       end
 
+      def template_format
+        @@template_format
+      end
+
       def release_header
         case context.current[:release]
         when :next
@@ -63,10 +67,11 @@ module Capistrano
         return unless context.current[:info]
         case context.current[:type]
         when :commit
-          context.current[:info][:commit][:message].chomp.delete("\r").split("\n")
+          message = context.current[:info][:commit][:message]
         when :pull_request
-          context.current[:info][:body].chomp.delete("\r").split("\n")
+          message = context.current[:info][:body]
         end
+        message.nil? ? [] : message.chomp.delete("\r").split("\n")
       end
 
       def has_item_lines

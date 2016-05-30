@@ -10,6 +10,8 @@ if is_latest_ruby?(ENV['TRAVIS_RUBY_VERSION'])
   CodeClimate::TestReporter.start
 end
 
+require 'webmock/rspec'
+
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 $LOAD_PATH.unshift File.expand_path('../../lib/committed', __FILE__)
 require 'i18n'
@@ -22,3 +24,22 @@ end
 require 'capistrano/committed'
 
 ENV['TZ'] = 'UTC'
+
+RSpec.configure do |config|
+  config.include WebMock::API
+
+  config.before(:each) do
+    WebMock.reset!
+  end
+  config.after(:each) do
+    WebMock.reset!
+  end
+end
+
+def fixture_path
+  File.expand_path("../fixtures", __FILE__)
+end
+
+def fixture(file)
+  File.new(File.join(fixture_path, '/', file))
+end

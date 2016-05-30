@@ -11,6 +11,7 @@ if is_latest_ruby?(ENV['TRAVIS_RUBY_VERSION'])
 end
 
 require 'webmock/rspec'
+WebMock.disable_net_connect!(:allow => "codeclimate.com")
 
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 $LOAD_PATH.unshift File.expand_path('../../lib/committed', __FILE__)

@@ -4,7 +4,7 @@
 
 # Capistrano Committed
 
-[![Stories in Ready](https://badge.waffle.io/sambauers/capistrano-committed.svg?label=ready&title=Ready)](http://waffle.io/sambauers/capistrano-committed)
+[![Waffle Stories in Ready](https://badge.waffle.io/sambauers/capistrano-committed.svg?label=ready&title=waffle%20ready)](http://waffle.io/sambauers/capistrano-committed)
 [![Gem Version](https://badge.fury.io/rb/capistrano-committed.svg)](https://badge.fury.io/rb/capistrano-committed)
 [![Build Status](https://travis-ci.org/sambauers/capistrano-committed.svg?branch=master)](https://travis-ci.org/sambauers/capistrano-committed)
 [![Test Coverage](https://codeclimate.com/github/sambauers/capistrano-committed/badges/coverage.svg)](https://codeclimate.com/github/sambauers/capistrano-committed/coverage)

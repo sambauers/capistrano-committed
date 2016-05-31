@@ -198,6 +198,35 @@ module Capistrano
         end
 
         describe 'item_link' do
+          let(:url) { 'https://example.org/test' }
+
+          it 'returns the html formatted item link on a commit' do
+            output.get_output_template_path('html')
+            output.context.current[:type] = :commit
+            output.context.current[:info] = { html_url: url }
+            expect(output.item_link).to eq format('<a href="%s">%s</a>', url, url)
+          end
+
+          it 'returns the html formatted item link on a pull_request' do
+            output.get_output_template_path('html')
+            output.context.current[:type] = :pull_request
+            output.context.current[:info] = { html_url: url }
+            expect(output.item_link).to eq format('<a href="%s">%s</a>', url, url)
+          end
+
+          it 'returns the txt item link on a commit' do
+            output.get_output_template_path('txt')
+            output.context.current[:type] = :commit
+            output.context.current[:info] = { html_url: url }
+            expect(output.item_link).to eq url
+          end
+
+          it 'returns the txt item link on a pull_request' do
+            output.get_output_template_path('txt')
+            output.context.current[:type] = :pull_request
+            output.context.current[:info] = { html_url: url }
+            expect(output.item_link).to eq url
+          end
         end
 
         context 'commits methods' do
@@ -209,6 +238,17 @@ module Capistrano
         end
 
         describe 'format_link' do
+          let(:url) { 'https://example.org/test' }
+
+          it 'returns the html formatted item link on a commit' do
+            output.get_output_template_path('html')
+            expect(output.send(:format_link, url)).to eq format('<a href="%s">%s</a>', url, url)
+          end
+
+          it 'returns the txt item link on a commit' do
+            output.get_output_template_path('txt')
+            expect(output.send(:format_link, url)).to eq url
+          end
         end
       end
     end

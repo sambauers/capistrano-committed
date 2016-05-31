@@ -2,12 +2,12 @@
   "sha": "7638417db6d59f3c431d3e1f261cc637155684cd",
   "url": "https://api.github.com/repos/octocat/Hello-World/git/commits/7638417db6d59f3c431d3e1f261cc637155684cd",
   "author": {
-    "date": "2010-04-10T14:10:01-07:00",
+    "date": "2016-05-31T05:17:42Z",
     "name": "Scott Chacon",
     "email": "schacon@gmail.com"
   },
   "committer": {
-    "date": "2010-04-10T14:10:01-07:00",
+    "date": "2016-05-31T05:17:42Z",
     "name": "Scott Chacon",
     "email": "schacon@gmail.com"
   },

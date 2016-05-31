@@ -167,16 +167,39 @@ module Capistrano
 
     describe 'add_dates_to_revisions' do
       let(:revisions) { { next: { release: :next, entries: {} },
-                          '20160119003754' => { branch: 'master', sha: '08e0390', release: '20160119003754', user: 'jim', entries: {} },
-                          '20160119002603' => { branch: 'master', sha: '08e0390', release: '20160119002603', user: 'daniel', entries: {} },
-                          '20160118044318' => { branch: 'master', sha: '66fcf81', release: '20160118044318', user: 'daniel', entries: {} },
-                          '20160113003755' => { branch: 'master', sha: 'e5535c4', release: '20160113003755', user: 'mike', entries: {} },
-                          '20160106034830' => { branch: 'master', sha: '3b3e45d', release: '20160106034830', user: 'sam', entries: {} },
+                          '20160119003754' => { branch: 'master', sha: '7638417', release: '20160119003754', user: 'jim', entries: {} },
+                          '20160119002603' => { branch: 'master', sha: '7638417', release: '20160119002603', user: 'daniel', entries: {} },
+                          '20160118044318' => { branch: 'master', sha: '7638417', release: '20160118044318', user: 'daniel', entries: {} },
+                          '20160113003755' => { branch: 'master', sha: '7638417', release: '20160113003755', user: 'mike', entries: {} },
+                          '20160106034830' => { branch: 'master', sha: '7638417', release: '20160106034830', user: 'sam', entries: {} },
                           previous: { release: :previous, entries: {} }
+      } }
+      let(:dated_revisions) { { next: { release: :next, entries: {} },
+                                '20160119003754' => { branch: 'master', sha: '7638417', release: '20160119003754', user: 'jim', entries: {}, date: '2016-05-31T05:17:42Z' },
+                                '20160119002603' => { branch: 'master', sha: '7638417', release: '20160119002603', user: 'daniel', entries: {}, date: '2016-05-31T05:17:42Z' },
+                                '20160118044318' => { branch: 'master', sha: '7638417', release: '20160118044318', user: 'daniel', entries: {}, date: '2016-05-31T05:17:42Z' },
+                                '20160113003755' => { branch: 'master', sha: '7638417', release: '20160113003755', user: 'mike', entries: {}, date: '2016-05-31T05:17:42Z' },
+                                '20160106034830' => { branch: 'master', sha: '7638417', release: '20160106034830', user: 'sam', entries: {}, date: '2016-05-31T05:17:42Z' },
+                                previous: { release: :previous, entries: {} }
       } }
       let(:github) { Committed::GithubApi.new() }
       let(:git_user) { 'username' }
       let(:git_repo) { 'repository' }
+      let(:sha) { '7638417' }
+
+      before {
+        stub_request(:get,
+                     format('%s/repos/%s/%s/commits/%s',
+                            Github.endpoint.to_s,
+                            git_user,
+                            git_repo,
+                            sha)).to_return(body: body,
+                                            status: status,
+                                            headers: {content_type: 'application/json; charset=utf-8'})
+      }
+
+      let(:body) { fixture('git_data/commit.json') }
+      let(:status) { 200 }
 
       it 'fails if revisions is not a Hash' do
         expect{ Committed.add_dates_to_revisions(nil, github, git_user, git_repo) }.to raise_error TypeError
@@ -192,6 +215,10 @@ module Capistrano
 
       it 'fails if git_repo is not a String' do
         expect{ Committed.add_dates_to_revisions(revisions, github, git_user, nil) }.to raise_error TypeError
+      end
+
+      it 'adds commit dates to releases' do
+        expect(Committed.add_dates_to_revisions(revisions, github, git_user, git_repo)).to eq dated_revisions
       end
     end
 

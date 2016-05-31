@@ -9,7 +9,7 @@ module Capistrano
       let(:user)      { 'octocat' }
       let(:repo)      { 'Hello-World' }
       let(:number)    { 1 }
-      let(:sha)       { '7638417db6d59f3c' }
+      let(:sha)       { '7638417' }
       let(:sha_full)  { '7638417db6d59f3c431d3e1f261cc637155684cd' }
       let(:author)    { 'Scott Chacon' }
       let(:date)      { '2015-08-10T08:00:00Z' }

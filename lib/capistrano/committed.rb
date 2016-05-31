@@ -76,7 +76,7 @@ module Capistrano
                                      git_repo,
                                      revision[:sha])
           unless commit.nil?
-            revisions[release][:date] = commit[:commit][:committer][:date]
+            revisions[release][:date] = commit[:committer][:date]
           end
         end
         revisions

@@ -6,7 +6,8 @@ namespace :committed do
       fail TypeError, t('committed.error.prerequisites.nil',
                         variable: variable,
                         name: name) if
-                          fetch(variable).nil?
+                          fetch(variable).nil? ||
+                          !fetch(variable).is_a?(String)
 
       fail ArgumentError, t('committed.error.prerequisites.empty',
                             variable: variable,

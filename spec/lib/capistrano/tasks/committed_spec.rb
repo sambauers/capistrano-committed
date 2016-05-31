@@ -30,6 +30,16 @@ context 'rake tasks' do
         end
       end
 
+      it 'fails if committed_user is not a String' do
+        dsl.set :committed_user, -> { 1 }
+        dsl.set :committed_repo, -> { 'test' }
+        begin
+          subject.invoke
+        rescue Exception => e
+          expect(e).to be_a TypeError
+        end
+      end
+
       it 'fails if committed_user is empty' do
         dsl.set :committed_user, -> { '' }
         dsl.set :committed_repo, -> { 'test' }
@@ -42,6 +52,16 @@ context 'rake tasks' do
 
       it 'fails if committed_repo is nil' do
         dsl.set :committed_user, -> { 'test' }
+        begin
+          subject.invoke
+        rescue Exception => e
+          expect(e).to be_a TypeError
+        end
+      end
+
+      it 'fails if committed_repo is not a String' do
+        dsl.set :committed_user, -> { 'test' }
+        dsl.set :committed_repo, -> { 1 }
         begin
           subject.invoke
         rescue Exception => e

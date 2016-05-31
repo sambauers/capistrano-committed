@@ -75,8 +75,14 @@ module Capistrano
           commit = github.get_commit(git_user,
                                      git_repo,
                                      revision[:sha])
+
           unless commit.nil?
-            revisions[release][:date] = commit[:committer][:date]
+            revisions[release][:date] = case
+            when !commit[:commit].nil?
+              commit[:commit][:committer][:date]
+            when !commit[:committer].nil?
+              commit[:committer][:date]
+            end
           end
         end
         revisions

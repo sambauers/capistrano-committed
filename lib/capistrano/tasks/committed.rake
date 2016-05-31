@@ -126,10 +126,9 @@ namespace :committed do
 
       # No revisions, no log
       if revisions.empty?
-        info t('committed.error.runtime.revisions_empty',
-               branch: fetch(:branch).to_s,
-               stage: fetch(:stage).to_s)
-        return
+        error t('committed.error.runtime.revisions_empty',
+                branch: fetch(:branch).to_s,
+                stage: fetch(:stage).to_s)
       end
 
       # Initialize the GitHub API client
@@ -143,10 +142,9 @@ namespace :committed do
 
       # No commit data on revisions, no log
       if earliest_date.nil?
-        info t('committed.error.runtime.revision_commit_missing',
-               branch: fetch(:branch).to_s,
-               stage: fetch(:stage).to_s)
-        return
+        error t('committed.error.runtime.revision_commit_missing',
+                branch: fetch(:branch).to_s,
+                stage: fetch(:stage).to_s)
       end
 
       # Go back an extra N days
@@ -161,11 +159,10 @@ namespace :committed do
 
       # No commits, no log
       if commits.empty?
-        info t('committed.error.runtime.commits_empty',
-               branch: fetch(:branch).to_s,
-               stage: fetch(:stage).to_s,
-               time: earliest_date)
-        return
+        error t('committed.error.runtime.commits_empty',
+                branch: fetch(:branch).to_s,
+                stage: fetch(:stage).to_s,
+                time: earliest_date)
       end
 
       # Map commits to a hash keyed by sha

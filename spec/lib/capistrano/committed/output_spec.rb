@@ -151,14 +151,57 @@ module Capistrano
         end
 
         context 'issue links methods' do
+          let(:message) { "This is the first [PROJECT-123]\r\nThis is the second [PROJECT-456]" }
+          let(:links) { ['https://example.jira.com/browse/PROJECT-123', 'https://example.jira.com/browse/PROJECT-456'] }
+
+          before(:each) do
+            output.context.current[:type] = :commit
+            output.context.current[:info] = { commit: { message: message } }
+            ::Capistrano::Committed.import_settings({
+              issue_match: '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]',
+              issue_postprocess: [],
+              issue_url: 'https://example.jira.com/browse/%s'
+            })
+          end
+
           describe 'issue_links' do
+            it 'returns an array of links from the commit' do
+              expect(output.issue_links).to eq links
+            end
+
+            it 'returns an array of links from the pull request' do
+              output.context.current[:type] = :pull_request
+              output.context.current[:info] = { title: 'Test', body: message }
+              expect(output.issue_links).to eq links
+            end
           end
 
           describe 'has_issue_links' do
+            it 'returns true when there are issue links' do
+              expect(output.has_issue_links).to eq true
+            end
+
+            it 'returns false when there are not issue links' do
+              output.context.current[:info][:commit][:message] = 'Test'
+              expect(output.has_issue_links).to eq false
+            end
           end
         end
 
         describe 'issue_link' do
+          let(:url) { 'https://example.org/test' }
+
+          it 'returns the html formatted issue link' do
+            output.get_output_template_path('html')
+            output.context.push url
+            expect(output.issue_link).to eq format('<a href="%s">%s</a>', url, url)
+          end
+
+          it 'returns the txt issue link' do
+            output.get_output_template_path('txt')
+            output.context.push url
+            expect(output.issue_link).to eq url
+          end
         end
 
         describe 'item_created_on' do

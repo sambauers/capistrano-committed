@@ -77,12 +77,7 @@ module Capistrano
                                      revision[:sha])
 
           unless commit.nil?
-            revisions[release][:date] = case
-            when !commit[:commit].nil?
-              commit[:commit][:committer][:date]
-            when !commit[:committer].nil?
-              commit[:committer][:date]
-            end
+            revisions[release][:date] = commit[:commit][:committer][:date]
           end
         end
         revisions

@@ -8,10 +8,8 @@ module Capistrano
 
       let(:user)      { 'octocat' }
       let(:repo)      { 'Hello-World' }
-      let(:number)    { 1 }
       let(:sha)       { '7638417' }
       let(:sha_full)  { '7638417db6d59f3c431d3e1f261cc637155684cd' }
-      let(:author)    { 'Scott Chacon' }
       let(:date)      { '2015-08-10T08:00:00Z' }
       let(:stage)     { 'production' }
       let(:status)    { 'pending' }
@@ -43,20 +41,6 @@ module Capistrano
       end
 
       describe 'get_commit' do
-        before {
-          stub_request(:get,
-                       format('%s/repos/%s/%s/commits/%s',
-                              Github.endpoint.to_s,
-                              user,
-                              repo,
-                              sha)).to_return(body: body,
-                                              status: status,
-                                              headers: {content_type: 'application/json; charset=utf-8'})
-        }
-
-        let(:body) { fixture('git_data/commit.json') }
-        let(:status) { 200 }
-
         it 'fails if user is not a String' do
           expect{ subject.get_commit(nil, repo, sha) }.to raise_error TypeError
         end
@@ -67,13 +51,6 @@ module Capistrano
 
         it 'fails if sha is not a String' do
           expect{ subject.get_commit(user, repo, nil) }.to raise_error TypeError
-        end
-
-        it 'should return a commit' do
-          commit = subject.get_commit(user, repo, sha)
-          expect(commit).to be_a Github::ResponseWrapper
-          expect(commit.sha).to eq sha_full
-          expect(commit.author.name).to eq author
         end
       end
 

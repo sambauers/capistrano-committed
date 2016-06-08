@@ -140,7 +140,7 @@ module Capistrano
     private
 
       def format_link(url)
-        case @@template_format
+        case template_format
         when 'html'
           format('<a href="%s">%s</a>', url, url)
         when 'txt'

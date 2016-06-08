@@ -70,6 +70,25 @@ module Capistrano
         end
 
         describe 'items' do
+          let(:entries) { { '2016-06-08T06:24:17Z' => [{a: 1, b: 2, c: 3}, {d: 1, e: 2, f: 3}],
+                            '2016-06-08T04:07:08Z' => [{a: 7, b: 8, c: 9}, {d: 7, e: 8, f: 9}],
+                            '2016-06-08T04:09:16Z' => [{a: 4, b: 5, c: 6}, {d: 4, e: 5, f: 6}] } }
+          let(:items) { [{:a=>1, :b=>2, :c=>3},
+                         {:d=>1, :e=>2, :f=>3},
+                         {:a=>4, :b=>5, :c=>6},
+                         {:d=>4, :e=>5, :f=>6},
+                         {:a=>7, :b=>8, :c=>9},
+                         {:d=>7, :e=>8, :f=>9}] }
+
+          it 'returns nil if there are no entries' do
+            output.context.current[:entries] = nil
+            expect(output.items).to eq nil
+          end
+
+          it 'returns a valid array' do
+            output.context.current[:entries] = entries
+            expect(output.items).to eq items
+          end
         end
 
         describe 'item_title' do
@@ -273,10 +292,43 @@ module Capistrano
         end
 
         context 'commits methods' do
+          let(:commits_flattened) { ['a', 'b', 'c'] }
+
+          before(:each) do
+            output.context.current[:type] = :pull_request
+            output.context.current[:commits] = [['a'], ['b'], ['c']]
+          end
+
           describe 'commits' do
+            it 'returns nil when type is not :pull_request' do
+              output.context.current[:type] = :commit
+              expect(output.commits).to eq nil
+            end
+
+            it 'returns nil when commits is nil' do
+              output.context.current[:commits] = nil
+              expect(output.commits).to eq nil
+            end
+
+            it 'returns nil when commits is empty' do
+              output.context.current[:commits] = []
+              expect(output.commits).to eq nil
+            end
+
+            it 'returns flattened commits array' do
+              expect(output.commits).to eq commits_flattened
+            end
           end
 
           describe 'has_commits' do
+            it 'returns true when there are commits' do
+              expect(output.has_commits).to eq true
+            end
+
+            it 'returns false when there are not commits' do
+              output.context.current[:commits] = []
+              expect(output.has_commits).to eq false
+            end
           end
         end
 

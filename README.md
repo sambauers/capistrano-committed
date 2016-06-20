@@ -43,7 +43,7 @@ Or install it yourself as:
 
     $ gem install capistrano-committed
 
-In your projects Capfile add this line:
+In your project’s Capfile add this line:
 
 ```ruby
 require 'capistrano/committed'
@@ -51,15 +51,24 @@ require 'capistrano/committed'
 
 ## Usage
 
-In `config/deploy.rb` (in Rails) you need to set at least these options:
+In `config/deploy.rb` (in Rails) you need to set at least these two options:
 
 ```ruby
 # This is the GitHub user or organisation for the repository
 set :committed_user, nil
+
+# This is the GitHub repository name
 set :committed_repo, nil
 ```
 
-You will usually need to set the `:committed_github_config` option in order to authenticate, this setting is a hash of options which are passed directly to the [GitHub API gem](https://github.com/peter-murach/github). The full list of GitHub API configuration option are in the [GitHub API gem read me file](https://github.com/peter-murach/github#2-configuration).
+An example of the above is for a Rails project with a GitHub address of `https://github.com/sambauers/awesome-rails-project` is:
+
+```ruby
+set :committed_user, 'sambauers'
+set :committed_repo, 'awesome-rails-project'
+```
+
+If your repository is private, you will need to set the `:committed_github_config` option in order to authenticate, this setting is a hash of options which are passed directly to the [GitHub API gem](https://github.com/peter-murach/github). The full list of GitHub API configuration option are in the [GitHub API gem read me file](https://github.com/peter-murach/github#2-configuration).
 
 Example of personal access token usage:
 

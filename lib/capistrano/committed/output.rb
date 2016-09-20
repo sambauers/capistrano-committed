@@ -82,6 +82,7 @@ module Capistrano
         return unless context.current[:info]
         case context.current[:type]
         when :commit
+          return unless context.current[:info][:commit]
           ::Capistrano::Committed.get_issue_urls(context.current[:info][:commit][:message])
         when :pull_request
           ::Capistrano::Committed.get_issue_urls(context.current[:info][:title] + context.current[:info][:body])
@@ -100,8 +101,11 @@ module Capistrano
         return unless context.current[:info]
         case context.current[:type]
         when :commit
+          return unless context.current[:info][:commit]
+          return unless context.current[:info][:commit][:committer]
           t('committed.output.committed_on', time: context.current[:info][:commit][:committer][:date])
         when :pull_request
+          return unless context.current[:info][:merged_at]
           t('committed.output.merged_on', time: context.current[:info][:merged_at])
         end
       end
@@ -110,8 +114,10 @@ module Capistrano
         return unless context.current[:info]
         case context.current[:type]
         when :commit
+          return unless context.current[:info][:committer]
           t('committed.output.committed_by', login: context.current[:info][:committer][:login])
         when :pull_request
+          return unless context.current[:info][:merged_by]
           t('committed.output.merged_by', login: context.current[:info][:merged_by][:login])
         else
 
@@ -119,16 +125,17 @@ module Capistrano
       end
 
       def item_link
+        return unless context.current[:info]
         case context.current[:type]
         when :commit, :pull_request
-          return unless context.current[:info]
+          return unless context.current[:info][:html_url]
           format_link(context.current[:info][:html_url])
         end
       end
 
       def commits
         return unless context.current[:type] == :pull_request
-        return if context.current[:commits].nil?
+        return unless context.current[:commits]
         return if context.current[:commits].empty?
         context.current[:commits].flatten
       end

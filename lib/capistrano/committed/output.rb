@@ -101,11 +101,9 @@ module Capistrano
         return unless context.current[:info]
         case context.current[:type]
         when :commit
-          return unless context.current[:info][:commit] && context.current[:info][:commit][:committer]
-          t('committed.output.committed_on', time: context.current[:info][:commit][:committer][:date])
+          commit_created_on(context.current[:info])
         when :pull_request
-          return unless context.current[:info][:merged_at]
-          t('committed.output.merged_on', time: context.current[:info][:merged_at])
+          pull_request_created_on(context.current[:info])
         end
       end
 
@@ -113,17 +111,12 @@ module Capistrano
         return unless context.current[:info]
         case context.current[:type]
         when :commit
-          info_key = :committer
-          t_key = 'committed.output.committed_by'
+          format_created_by('committed.output.committed_by', context.current[:info][:committer])
         when :pull_request
-          info_key = :merged_by
-          t_key = 'committed.output.merged_by'
+          format_created_by('committed.output.merged_by', context.current[:info][:merged_by])
         else
           return
         end
-        
-        return unless context.current[:info][info_key]
-        t(t_key, login: context.current[:info][info_key][:login])
       end
 
       def item_link
@@ -147,6 +140,21 @@ module Capistrano
       end
 
     private
+      
+      def commit_created_on(info)
+        return unless info[:commit] && info[:commit][:committer]
+        t('committed.output.committed_on', time: info[:commit][:committer][:date])
+      end
+      
+      def pull_request_created_on(info)
+        return unless info[:merged_at]
+        t('committed.output.merged_on', time: info[:merged_at])
+      end
+      
+      def format_created_by(t_key, user)
+        return unless user
+        t(t_key, login: user[:login])
+      end
 
       def format_link(url)
         case template_format

@@ -101,8 +101,7 @@ module Capistrano
         return unless context.current[:info]
         case context.current[:type]
         when :commit
-          return unless context.current[:info][:commit]
-          return unless context.current[:info][:commit][:committer]
+          return unless context.current[:info][:commit] && context.current[:info][:commit][:committer]
           t('committed.output.committed_on', time: context.current[:info][:commit][:committer][:date])
         when :pull_request
           return unless context.current[:info][:merged_at]
@@ -114,14 +113,17 @@ module Capistrano
         return unless context.current[:info]
         case context.current[:type]
         when :commit
-          return unless context.current[:info][:committer]
-          t('committed.output.committed_by', login: context.current[:info][:committer][:login])
+          info_key = :committer
+          t_key = 'committed.output.committed_by'
         when :pull_request
-          return unless context.current[:info][:merged_by]
-          t('committed.output.merged_by', login: context.current[:info][:merged_by][:login])
+          info_key = :merged_by
+          t_key = 'committed.output.merged_by'
         else
-
+          return
         end
+        
+        return unless context.current[:info][info_key]
+        t(t_key, login: context.current[:info][info_key][:login])
       end
 
       def item_link

@@ -2,12 +2,12 @@ def is_latest_ruby?(version)
   return false if version.nil?
   return false if version.empty?
   return false if !(Gem::Version.correct? version)
-  Gem::Version.new(version) >= Gem::Version.new('2.2')
+  Gem::Version.new(version) >= Gem::Version.new('2.3')
 end
 
 if is_latest_ruby?(ENV['TRAVIS_RUBY_VERSION'])
-  require "codeclimate-test-reporter"
-  CodeClimate::TestReporter.start
+  require 'simplecov'
+  SimpleCov.start
 end
 
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)

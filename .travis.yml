@@ -11,12 +11,6 @@ matrix:
   # it to fail without breaking the build.
   allow_failures:
     - rvm: rbx-2
-  include:
-    - rvm: rbx-2
-    # Run Danger only once, on 2.3.1
-    - rvm: 2.3.1
-      before_script: bundle exec danger
 addons:
   code_climate:
     repo_token: c19f4a2a864567e4dbf3e325b4423d9478c3bf025d9e3f85c6e2ffc0c9fb960f
-before_install: gem install bundler -v 1.11.2

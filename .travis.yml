@@ -4,14 +4,14 @@ rvm:
   - 2.2
   - 2.1
   - 2.0
+  - rbx-3
 matrix:
   # Rubinius periodically fails in general, and it always segfaults for RuboCop
   # in particular. Until we figure out how to make it work consistently, allow
   # it to fail without breaking the build.
   allow_failures:
-    - rvm: rbx-2
+    - rvm: rbx-3
   include:
-    - rvm: rbx-2
     - rvm: 2.3.1
       after_success: bundle exec codeclimate-test-reporter
       

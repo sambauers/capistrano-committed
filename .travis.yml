@@ -1,6 +1,7 @@
 language: ruby
 cache: bundler
 rvm:
+  - 2.3
   - 2.2
   - 2.1
   - 2.0
@@ -12,9 +13,9 @@ matrix:
   allow_failures:
     - rvm: rbx-3
   include:
-    - rvm: 2.3.1
+    - rvm: 2.4.1
       after_success: bundle exec codeclimate-test-reporter
-      
+
 addons:
   code_climate:
     repo_token: c19f4a2a864567e4dbf3e325b4423d9478c3bf025d9e3f85c6e2ffc0c9fb960f

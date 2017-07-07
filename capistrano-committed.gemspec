@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.license       = 'MIT'
 
   spec.summary       = %q{Tells you what Capistrano 3 is going to deploy based on GitHub commits since the last release.}
-  spec.description   = %q{Tells you what Capistrano 3 is going to deploy based on GitHub commits since the last release.}
+  spec.description   = %q{Tells you what Capistrano 3 is going to deploy based on GitHub commits since the last release. See README.md for more info.}
   spec.homepage      = "https://github.com/sambauers/capistrano-committed"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }

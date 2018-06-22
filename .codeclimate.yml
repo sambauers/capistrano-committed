@@ -4,23 +4,23 @@ plugins:
     enabled: true
     config:
       languages:
-      - ruby
+        - ruby
   fixme:
     enabled: true
   rubocop:
     enabled: true
 ratings:
   paths:
-  - "**.rb"
-  - "**.rake"
-  - "Rakefile"
+    - "**.rb"
+    - "**.rake"
+    - "Rakefile"
 exclude_paths:
-- bin/**/*
-- icons/**/*
-- spec/**/*
-- ".gitignore"
-- ".rspec"
-- ".rubocop.yml"
-- ".travis.yml"
-- "LICENSE.md"
-- "README.md"
+  - bin/**/*
+  - icons/**/*
+  - spec/**/*
+  - ".gitignore"
+  - ".rspec"
+  - ".rubocop.yml"
+  - ".travis.yml"
+  - "LICENSE.md"
+  - "README.md"

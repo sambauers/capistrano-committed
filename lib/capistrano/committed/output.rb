@@ -5,16 +5,16 @@ module Capistrano
     class Output < Mustache
       @@template_format = 'txt'
 
-      self.template_path = format('%s/output', File.dirname(__FILE__))
-      self.template_file = format('%s/output/output_%s.mustache', File.dirname(__FILE__), @@template_format)
+      self.template_path = format('%<dir>s/output', dir: File.dirname(__FILE__))
+      self.template_file = format('%<dir>s/output/output_%<format>s.mustache', dir: File.dirname(__FILE__), format: @@template_format)
 
       def get_output_path(file)
-        format('%s/output/%s', File.dirname(__FILE__), file)
+        format('%<dir>s/output/%<file>s', dir: File.dirname(__FILE__), file: file)
       end
 
       def get_output_template_path(format = 'txt', set_template_format = true)
         @@template_format = format if set_template_format
-        get_output_path(format('output_%s.mustache', format))
+        get_output_path(format('output_%<format>s.mustache', format: format))
       end
 
       def template_format
@@ -139,18 +139,18 @@ module Capistrano
         !commits.nil?
       end
 
-    private
-      
+      private
+
       def commit_created_on(info)
         return unless info[:commit] && info[:commit][:committer]
         t('committed.output.committed_on', time: info[:commit][:committer][:date])
       end
-      
+
       def pull_request_created_on(info)
         return unless info[:merged_at]
         t('committed.output.merged_on', time: info[:merged_at])
       end
-      
+
       def format_created_by(t_key, user)
         return unless user
         t(t_key, login: user[:login])
@@ -159,7 +159,7 @@ module Capistrano
       def format_link(url)
         case template_format
         when 'html'
-          format('<a href="%s">%s</a>', url, url)
+          format('<a href="%<url>s">%<url>s</a>', url: url)
         when 'txt'
           url
         end

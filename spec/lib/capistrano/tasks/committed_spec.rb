@@ -2,7 +2,11 @@ require 'spec_helper'
 
 context 'rake tasks' do
   let(:rake)      { Rake::Application.new }
-  let(:task_name) { format('%s:%s', self.class.superclass.description, self.class.description) }
+  let(:task_name) do
+    format('%<superklass>s:%<klass>s',
+           superklass: self.class.superclass.description,
+           klass: self.class.description)
+  end
   subject         { rake[task_name] }
   let(:dsl)       { Class.new.extend Capistrano::DSL }
 
@@ -25,7 +29,7 @@ context 'rake tasks' do
         dsl.set :committed_repo, -> { 'test' }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -35,7 +39,7 @@ context 'rake tasks' do
         dsl.set :committed_repo, -> { 'test' }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -45,7 +49,7 @@ context 'rake tasks' do
         dsl.set :committed_repo, -> { 'test' }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a ArgumentError
         end
       end
@@ -54,7 +58,7 @@ context 'rake tasks' do
         dsl.set :committed_user, -> { 'test' }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -64,7 +68,7 @@ context 'rake tasks' do
         dsl.set :committed_repo, -> { 1 }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -74,7 +78,7 @@ context 'rake tasks' do
         dsl.set :committed_repo, -> { '' }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a ArgumentError
         end
       end
@@ -85,7 +89,7 @@ context 'rake tasks' do
         dsl.set :committed_github_config, -> { 'test' }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -103,7 +107,7 @@ context 'rake tasks' do
         dsl.set :committed_revision_line, -> { nil }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -112,7 +116,7 @@ context 'rake tasks' do
         dsl.set :committed_revision_limit, -> { nil }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -121,7 +125,7 @@ context 'rake tasks' do
         dsl.set :committed_commit_buffer, -> { nil }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -130,7 +134,7 @@ context 'rake tasks' do
         dsl.set :committed_output_path, -> { 'test' }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -139,7 +143,7 @@ context 'rake tasks' do
         dsl.set :committed_output_text_path, -> { 1 }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -148,7 +152,7 @@ context 'rake tasks' do
         dsl.set :committed_output_html_path, -> { 1 }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -157,7 +161,7 @@ context 'rake tasks' do
         dsl.set :committed_issue_match, -> { 1 }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -166,7 +170,7 @@ context 'rake tasks' do
         dsl.set :committed_issue_url, -> { 1 }
         begin
           subject.invoke
-        rescue Exception => e
+        rescue StandardError => e
           expect(e).to be_a TypeError
         end
       end
@@ -207,7 +211,7 @@ context 'rake tasks' do
         expect(dsl.fetch(:committed_user)).to eq nil
         expect(dsl.fetch(:committed_repo)).to eq nil
         expect(dsl.fetch(:committed_revision_line)).to eq t('revision_log_message')
-        expect(dsl.fetch(:committed_github_config)).to eq ({})
+        expect(dsl.fetch(:committed_github_config)).to eq({})
         expect(dsl.fetch(:committed_revision_limit)).to eq 10
         expect(dsl.fetch(:committed_commit_buffer)).to eq 1
         expect(dsl.fetch(:committed_output_text_path)).to eq '%s/public/committed.txt'

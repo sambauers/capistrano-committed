@@ -1,64 +1,53 @@
 namespace :committed do
   task :check_prerequisites do
     # Checks all the settings to make sure they are OK - mostly just checks type
-    { committed_user: 'user',
-      committed_repo: 'repository' }.each do |variable, name|
-      fail TypeError, t('committed.error.prerequisites.nil',
-                        variable: variable,
-                        name: name) if
-                          fetch(variable).nil? ||
-                          !fetch(variable).is_a?(String)
-
-      fail ArgumentError, t('committed.error.prerequisites.empty',
-                            variable: variable,
-                            name: name) if
-                              fetch(variable).empty?
+    { committed_user: 'user', committed_repo: 'repository' }.each do |variable, name|
+      if fetch(variable).nil? || !fetch(variable).is_a?(String)
+        raise TypeError, t('committed.error.prerequisites.nil', variable: variable, name: name)
+      end
+      if fetch(variable).empty?
+        raise ArgumentError, t('committed.error.prerequisites.empty', variable: variable, name: name)
+      end
     end
 
-    fail TypeError, t('committed.error.prerequisites.hash',
-                      variable: 'committed_github_config') unless
-                        fetch(:committed_github_config).is_a?(Hash)
+    unless fetch(:committed_github_config).is_a?(Hash)
+      raise TypeError, t('committed.error.prerequisites.hash', variable: 'committed_github_config')
+    end
   end
 
   task :check_report_prerequisites do
     # Checks all the settings to make sure they are OK - mostly just checks type
-    fail TypeError, t('committed.error.prerequisites.string',
-                      variable: 'committed_revision_line') unless
-                        fetch(:committed_revision_line).is_a?(String)
+    unless fetch(:committed_revision_line).is_a?(String)
+      raise TypeError, t('committed.error.prerequisites.string', variable: 'committed_revision_line')
+    end
 
-    fail TypeError, t('committed.error.prerequisites.integer',
-                      variable: 'committed_revision_limit') unless
-                        fetch(:committed_revision_limit).is_a?(Integer)
+    unless fetch(:committed_revision_limit).is_a?(Integer)
+      raise TypeError, t('committed.error.prerequisites.integer', variable: 'committed_revision_limit')
+    end
 
-    fail TypeError, t('committed.error.prerequisites.integer',
-                      variable: 'committed_commit_buffer') unless
-                        fetch(:committed_commit_buffer).is_a?(Integer)
+    unless fetch(:committed_commit_buffer).is_a?(Integer)
+      raise TypeError, t('committed.error.prerequisites.integer', variable: 'committed_commit_buffer')
+    end
 
-    fail TypeError, t('committed.error.deprecated',
-                      deprecated: 'committed_output_path',
-                      replacement: 'committed_output_text_path') if
-                        fetch(:committed_output_path).is_a?(String)
+    if fetch(:committed_output_path).is_a?(String)
+      raise TypeError, t('committed.error.deprecated', deprecated: 'committed_output_path', replacement: 'committed_output_text_path')
+    end
 
-    fail TypeError, t('committed.error.prerequisites.string_or_nil',
-                      variable: 'committed_output_text_path') unless
-                        fetch(:committed_output_text_path).is_a?(String) ||
-                        fetch(:committed_output_text_path).nil?
+    unless fetch(:committed_output_text_path).is_a?(String) || fetch(:committed_output_text_path).nil?
+      raise TypeError, t('committed.error.prerequisites.string_or_nil', variable: 'committed_output_text_path')
+    end
 
-    fail TypeError, t('committed.error.prerequisites.string_or_nil',
-                      variable: 'committed_output_html_path') unless
-                        fetch(:committed_output_html_path).is_a?(String) ||
-                        fetch(:committed_output_html_path).nil?
+    unless fetch(:committed_output_html_path).is_a?(String) || fetch(:committed_output_html_path).nil?
+      raise TypeError, t('committed.error.prerequisites.string_or_nil', variable: 'committed_output_html_path')
+    end
 
-    fail TypeError, t('committed.error.prerequisites.string_or_regexp_or_nil',
-                      variable: 'committed_issue_match') unless
-                        fetch(:committed_issue_match).is_a?(String) ||
-                        fetch(:committed_issue_match).is_a?(Regexp) ||
-                        fetch(:committed_issue_match).nil?
+    unless fetch(:committed_issue_match).is_a?(String) || fetch(:committed_issue_match).is_a?(Regexp) || fetch(:committed_issue_match).nil?
+      raise TypeError, t('committed.error.prerequisites.string_or_regexp_or_nil', variable: 'committed_issue_match')
+    end
 
-    fail TypeError, t('committed.error.prerequisites.string_or_nil',
-                      variable: 'committed_issue_url') unless
-                        fetch(:committed_issue_url).is_a?(String) ||
-                        fetch(:committed_issue_url).nil?
+    unless fetch(:committed_issue_url).is_a?(String) || fetch(:committed_issue_url).nil?
+      raise TypeError, t('committed.error.prerequisites.string_or_nil', variable: 'committed_issue_url')
+    end
   end
 
   # task :register_deployment_pending do
@@ -99,7 +88,7 @@ namespace :committed do
     invoke 'committed:check_prerequisites'
     invoke 'committed:check_report_prerequisites'
 
-    ::Capistrano::Committed.import_settings({
+    ::Capistrano::Committed.import_settings(
       branch:            fetch(:branch),
       user:              fetch(:committed_user),
       repo:              fetch(:committed_repo),
@@ -114,7 +103,7 @@ namespace :committed do
       issue_url:         fetch(:committed_issue_url),
       deployments:       fetch(:committed_deployments),
       deployment_id:     fetch(:committed_deployment_id)
-    })
+    )
 
     # Only do this on the primary web server
     on primary :web do
@@ -241,7 +230,7 @@ namespace :committed do
       # Send the text output to screen, or to a file on the server
 
       # Create the mustache instance and plug in the revisions
-      output = ::Capistrano::Committed::Output.new()
+      output = ::Capistrano::Committed::Output.new
       output[:revisions] = revisions.values
       output[:page_title] = t('committed.output.page_title',
                               repo: format('%s/%s', fetch(:committed_user), fetch(:committed_repo)))

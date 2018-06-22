@@ -3,6 +3,8 @@ require 'github_api'
 module Capistrano
   module Committed
     class GithubApi
+      attr_reader :client
+
       def initialize(config_options = {})
         validate('config_options', config_options, Hash, __callee__)
 
@@ -14,10 +16,6 @@ module Capistrano
         options.merge! config_options
 
         @client = ::Github.new options
-      end
-
-      def client
-        @client
       end
 
       def get_commit(user, repo, sha)
@@ -81,13 +79,11 @@ module Capistrano
         validate_user_and_repo(user, repo, __callee__)
         validate('id', id, Integer, __callee__)
 
-        valid_states = %w(pending success error failure)
+        valid_states = %w[pending success error failure]
         state = state.to_s
         unless valid_states.include?(state)
-          message = t('committed.error.helpers.valid_param',
-                      method: __callee__,
-                      param: 'state')
-          fail TypeError, message
+          message = t('committed.error.helpers.valid_param', method: __callee__, param: 'state')
+          raise TypeError, message
         end
 
         api_call do
@@ -105,7 +101,7 @@ module Capistrano
         message = t('committed.error.helpers.valid_param',
                     method: method,
                     param: param)
-        fail TypeError, message
+        raise TypeError, message
       end
 
       def validate_user_and_repo(user, repo, method)
@@ -116,11 +112,8 @@ module Capistrano
       def api_call
         yield
       rescue ::Github::Error::GithubError => e
-        if e.is_a? ::Github::Error::ServiceError
-          raise e, t('committed.error.helpers.github_service_error')
-        elsif e.is_a? ::Github::Error::ClientError
-          raise e, t('committed.error.helpers.github_client_error')
-        end
+        raise e, t('committed.error.helpers.github_service_error') if e.is_a? ::Github::Error::ServiceError
+        raise e, t('committed.error.helpers.github_client_error') if e.is_a? ::Github::Error::ClientError
       end
     end
   end

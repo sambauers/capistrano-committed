@@ -38,7 +38,7 @@ en = {
   }
 }
 
-I18n.backend.store_translations(:en, { capistrano: { committed: en } })
+I18n.backend.store_translations(:en, capistrano: { committed: en })
 
 if I18n.respond_to?(:enforce_available_locales=)
   I18n.enforce_available_locales = true

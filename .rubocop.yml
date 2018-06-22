@@ -1,0 +1,24 @@
+---
+AllCops:
+  TargetRubyVersion: 2.2
+
+Metrics/LineLength:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'lib/capistrano/tasks/*'
+    - 'spec/**/*'
+
+Metrics/ModuleLength:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Naming/PredicateName:
+  Exclude:
+    - 'lib/capistrano/committed/output.rb'
+
+Style/Documentation:
+  Enabled: false

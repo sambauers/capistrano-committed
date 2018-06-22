@@ -7,25 +7,23 @@ module Capistrano
       subject(:output) { object.new }
 
       context 'initialisation' do
-        after(:each) {
-          output.get_output_template_path
-        }
+        after(:each) { output.get_output_template_path }
 
         describe 'get_output_path' do
           let(:file) { 'output_foo.mustache' }
 
           it 'returns a string containing the file' do
-            expect(output.get_output_path(file)).to match(/\/lib\/capistrano\/committed\/output\/output\_foo\.mustache$/)
+            expect(output.get_output_path(file)).to match(%r{/lib/capistrano/committed/output/output\_foo\.mustache$})
           end
         end
 
         describe 'get_output_template_path' do
           it 'returns a string containing the txt template path' do
-            expect(output.get_output_template_path).to match(/\/lib\/capistrano\/committed\/output\/output\_txt\.mustache$/)
+            expect(output.get_output_template_path).to match(%r{/lib/capistrano/committed/output/output\_txt\.mustache$})
           end
 
           it 'returns a string containing the html template path' do
-            expect(output.get_output_template_path('html')).to match(/\/lib\/capistrano\/committed\/output\/output\_html\.mustache$/)
+            expect(output.get_output_template_path('html')).to match(%r{/lib/capistrano/committed/output/output\_html\.mustache$})
           end
         end
 
@@ -46,9 +44,7 @@ module Capistrano
         describe 'release_header' do
           let(:date) { '2016-05-09T00:04:34Z' }
 
-          before {
-            output.context.current[:date] = date
-          }
+          before { output.context.current[:date] = date }
 
           it 'returns next release header' do
             output.context.current[:release] = :next
@@ -57,28 +53,27 @@ module Capistrano
 
           it 'returns previous release header' do
             output.context.current[:release] = :previous
-            expect(output.release_header).to eq format('Commits before %s are omitted from the report   ¯\_(ツ)_/¯',
-                                                       date)
+            expect(output.release_header).to eq format('Commits before %<date>s are omitted from the report   ¯\_(ツ)_/¯', date: date)
           end
 
           it 'returns the formatted release header' do
             output.context.current[:release] = '20160525010106'
             output.context.current[:sha] = 'a2c4e6g'
-            expect(output.release_header).to eq format('Release on 2016-05-25T01:01:06+00:00 from commit a2c4e6g at %s',
-                                                       date)
+            expect(output.release_header).to eq format('Release on 2016-05-25T01:01:06+00:00 from commit a2c4e6g at %<date>s', date: date)
           end
         end
 
         describe 'items' do
-          let(:entries) { { '2016-06-08T06:24:17Z' => [{a: 1, b: 2, c: 3}, {d: 1, e: 2, f: 3}],
-                            '2016-06-08T04:07:08Z' => [{a: 7, b: 8, c: 9}, {d: 7, e: 8, f: 9}],
-                            '2016-06-08T04:09:16Z' => [{a: 4, b: 5, c: 6}, {d: 4, e: 5, f: 6}] } }
-          let(:items) { [{:a=>1, :b=>2, :c=>3},
-                         {:d=>1, :e=>2, :f=>3},
-                         {:a=>4, :b=>5, :c=>6},
-                         {:d=>4, :e=>5, :f=>6},
-                         {:a=>7, :b=>8, :c=>9},
-                         {:d=>7, :e=>8, :f=>9}] }
+          let(:entries) do
+            { '2016-06-08T06:24:17Z' => [{ a: 1, b: 2, c: 3 }, { d: 1, e: 2, f: 3 }],
+              '2016-06-08T04:07:08Z' => [{ a: 7, b: 8, c: 9 }, { d: 7, e: 8, f: 9 }],
+              '2016-06-08T04:09:16Z' => [{ a: 4, b: 5, c: 6 }, { d: 4, e: 5, f: 6 }] }
+          end
+          let(:items) do
+            [{ a: 1, b: 2, c: 3 }, { d: 1, e: 2, f: 3 },
+             { a: 4, b: 5, c: 6 }, { d: 4, e: 5, f: 6 },
+             { a: 7, b: 8, c: 9 }, { d: 7, e: 8, f: 9 }]
+          end
 
           it 'returns nil if there are no entries' do
             output.context.current[:entries] = nil
@@ -101,12 +96,12 @@ module Capistrano
 
           it 'returns the formatted commit title' do
             output.context.current[:type] = :commit
-            expect(output.item_title).to eq format('Commit %s', sha)
+            expect(output.item_title).to eq format('Commit %<sha>s', sha: sha)
           end
 
           it 'returns the formatted pull request title' do
             output.context.current[:type] = :pull_request
-            expect(output.item_title).to eq format('Pull Request #%s', number)
+            expect(output.item_title).to eq format('Pull Request #%<number>s', number: number.to_s)
           end
         end
 
@@ -176,11 +171,11 @@ module Capistrano
           before(:each) do
             output.context.current[:type] = :commit
             output.context.current[:info] = { commit: { message: message } }
-            ::Capistrano::Committed.import_settings({
+            ::Capistrano::Committed.import_settings(
               issue_match: '\[\s?([a-zA-Z0-9]+\-[0-9]+)\s?\]',
               issue_postprocess: [],
               issue_url: 'https://example.jira.com/browse/%s'
-            })
+            )
           end
 
           describe 'issue_links' do
@@ -213,7 +208,7 @@ module Capistrano
           it 'returns the html formatted issue link' do
             output.get_output_template_path('html')
             output.context.push url
-            expect(output.issue_link).to eq format('<a href="%s">%s</a>', url, url)
+            expect(output.issue_link).to eq format('<a href="%<url>s">%<url>s</a>', url: url)
           end
 
           it 'returns the txt issue link' do
@@ -229,15 +224,13 @@ module Capistrano
           it 'returns the formatted commit creation date' do
             output.context.current[:type] = :commit
             output.context.current[:info] = { commit: { committer: { date: date } } }
-            expect(output.item_created_on).to eq format('Committed on: %s',
-                                                        date)
+            expect(output.item_created_on).to eq format('Committed on: %<date>s', date: date)
           end
 
           it 'returns the formatted pull request merge date' do
             output.context.current[:type] = :pull_request
             output.context.current[:info] = { merged_at: date }
-            expect(output.item_created_on).to eq format('Merged on: %s',
-                                                        date)
+            expect(output.item_created_on).to eq format('Merged on: %<date>s', date: date)
           end
         end
 
@@ -247,15 +240,13 @@ module Capistrano
           it 'returns the formatted committer' do
             output.context.current[:type] = :commit
             output.context.current[:info] = { committer: { login: login } }
-            expect(output.item_created_by).to eq format('Committed by: %s',
-                                                        login)
+            expect(output.item_created_by).to eq format('Committed by: %<login>s', login: login)
           end
 
           it 'returns the formatted pull request merger' do
             output.context.current[:type] = :pull_request
             output.context.current[:info] = { merged_by: { login: login } }
-            expect(output.item_created_by).to eq format('Merged by: %s',
-                                                        login)
+            expect(output.item_created_by).to eq format('Merged by: %<login>s', login: login)
           end
         end
 
@@ -266,14 +257,14 @@ module Capistrano
             output.get_output_template_path('html')
             output.context.current[:type] = :commit
             output.context.current[:info] = { html_url: url }
-            expect(output.item_link).to eq format('<a href="%s">%s</a>', url, url)
+            expect(output.item_link).to eq format('<a href="%<url>s">%<url>s</a>', url: url)
           end
 
           it 'returns the html formatted item link on a pull_request' do
             output.get_output_template_path('html')
             output.context.current[:type] = :pull_request
             output.context.current[:info] = { html_url: url }
-            expect(output.item_link).to eq format('<a href="%s">%s</a>', url, url)
+            expect(output.item_link).to eq format('<a href="%<url>s">%<url>s</a>', url: url)
           end
 
           it 'returns the txt item link on a commit' do
@@ -292,7 +283,7 @@ module Capistrano
         end
 
         context 'commits methods' do
-          let(:commits_flattened) { ['a', 'b', 'c'] }
+          let(:commits_flattened) { %w[a b c] }
 
           before(:each) do
             output.context.current[:type] = :pull_request
@@ -337,7 +328,7 @@ module Capistrano
 
           it 'returns the html formatted item link on a commit' do
             output.get_output_template_path('html')
-            expect(output.send(:format_link, url)).to eq format('<a href="%s">%s</a>', url, url)
+            expect(output.send(:format_link, url)).to eq format('<a href="%<url>s">%<url>s</a>', url: url)
           end
 
           it 'returns the txt item link on a commit' do

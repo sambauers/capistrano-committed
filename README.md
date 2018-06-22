@@ -9,7 +9,6 @@
 [![Test Coverage](https://codeclimate.com/github/sambauers/capistrano-committed/badges/coverage.svg)](https://codeclimate.com/github/sambauers/capistrano-committed/coverage)
 [![Code Climate](https://codeclimate.com/github/sambauers/capistrano-committed/badges/gpa.svg)](https://codeclimate.com/github/sambauers/capistrano-committed)
 [![Issue Count](https://codeclimate.com/github/sambauers/capistrano-committed/badges/issue_count.svg)](https://codeclimate.com/github/sambauers/capistrano-committed)
-[![Dependency Status](https://gemnasium.com/sambauers/capistrano-committed.svg)](https://gemnasium.com/sambauers/capistrano-committed)
 
 Capistrano Committed is an extension to Capistrano 3 which helps to determine what you are about to deploy.
 

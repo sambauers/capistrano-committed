@@ -1,11 +1,11 @@
-def is_latest_ruby?(version)
+def latest_ruby?(version)
   return false if version.nil?
   return false if version.empty?
   return false unless Gem::Version.correct?(version)
-  Gem::Version.new(version) >= Gem::Version.new('2.3')
+  Gem::Version.new(version) >= Gem::Version.new('2.5')
 end
 
-if is_latest_ruby?(ENV['TRAVIS_RUBY_VERSION'])
+if latest_ruby?(ENV['TRAVIS_RUBY_VERSION'])
   require 'simplecov'
   SimpleCov.start
 end

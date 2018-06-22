@@ -233,7 +233,9 @@ namespace :committed do
       output = ::Capistrano::Committed::Output.new
       output[:revisions] = revisions.values
       output[:page_title] = t('committed.output.page_title',
-                              repo: format('%s/%s', fetch(:committed_user), fetch(:committed_repo)))
+                              repo: format('%<user>s/%<repo>s',
+                                           user: fetch(:committed_user),
+                                           repo: fetch(:committed_repo)))
 
       # Send the text output to a file on the server
       if fetch(:committed_output_text_path).nil?

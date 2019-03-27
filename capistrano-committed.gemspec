@@ -13,12 +13,10 @@ Gem::Specification.new do |spec|
   spec.description   = 'Tells you what Capistrano 3 is going to deploy based on GitHub commits since the last release. See README.md for more info.'
   spec.homepage      = 'https://github.com/sambauers/capistrano-committed'
 
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
-  spec.bindir        = 'exe'
-  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+  spec.files         = Dir['lib/**/*', 'capistrano-committed.gemspec', 'Gemfile', '*.md']
   spec.require_paths = ['lib']
 
-  spec.required_ruby_version = '>= 2.2.7'
+  spec.required_ruby_version = '>= 2.3.8'
 
   spec.add_dependency 'capistrano', '~> 3'
   spec.add_dependency 'github_api', '~> 0.18'

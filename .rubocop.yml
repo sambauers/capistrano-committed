@@ -1,6 +1,6 @@
 ---
 AllCops:
-  TargetRubyVersion: 2.2
+  TargetRubyVersion: 2.3.8
 
 Metrics/LineLength:
   Enabled: false

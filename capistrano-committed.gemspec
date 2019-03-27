@@ -20,12 +20,12 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 2.2.7'
 
-  spec.add_dependency 'capistrano', '~> 3.8'
-  spec.add_dependency 'github_api', '~> 0.17'
-  spec.add_dependency 'mustache', '~> 1.0'
-  spec.add_dependency 'rack', '~> 2.0'
+  spec.add_dependency 'capistrano', '~> 3'
+  spec.add_dependency 'github_api', '~> 0.18'
+  spec.add_dependency 'mustache', '~> 1'
+  spec.add_dependency 'rack', '~> 2'
 
-  spec.add_development_dependency 'bundler', '~> 1.15'
-  spec.add_development_dependency 'rake', '~> 12.0'
-  spec.add_development_dependency 'rspec', '~> 3.6'
+  spec.add_development_dependency 'bundler', '~> 2'
+  spec.add_development_dependency 'rake', '~> 12'
+  spec.add_development_dependency 'rspec', '~> 3'
 end
